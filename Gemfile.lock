@@ -1,0 +1,25 @@
+PATH
+  remote: .
+  specs:
+    fast_underscore (0.0.1)
+
+GEM
+  remote: https://rubygems.org/
+  specs:
+    minitest (5.10.3)
+    rake (12.3.0)
+    rake-compiler (0.9.9)
+      rake
+
+PLATFORMS
+  ruby
+
+DEPENDENCIES
+  bundler (~> 1)
+  fast_underscore!
+  minitest (~> 5)
+  rake (~> 12)
+  rake-compiler (~> 0)
+
+BUNDLED WITH
+   1.16.1.pre1
