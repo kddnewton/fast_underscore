@@ -246,7 +246,7 @@ builder_free(builder_t *builder) {
 }
 
 static VALUE
-rb_str_underscore(VALUE rb_string) {
+rb_str_underscore(VALUE self, VALUE rb_string) {
   rb_encoding *encoding = rb_enc_from_index(ENCODING_GET(rb_string));
 
   char *string = RSTRING_PTR(rb_string);
@@ -269,5 +269,6 @@ rb_str_underscore(VALUE rb_string) {
 }
 
 void Init_fast_underscore(void) {
-  rb_define_method(rb_cString, "underscore", rb_str_underscore, 0);
+  VALUE rb_cFastUnderscore = rb_define_module("FastUnderscore");
+  rb_define_singleton_method(rb_cFastUnderscore, "underscore", rb_str_underscore, 1);
 }
