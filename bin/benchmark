@@ -18,12 +18,12 @@ source = %w[_ - : /] + ('a'..'z').to_a + ('A'..'Z').to_a + ('0'..'9').to_a
 words = 500.times.map { Array.new(100) { source.sample }.join }
 
 Benchmark.ips do |x|
-  x.report('Fast underscore') do
-    words.each(&:underscore)
+  x.report('ActiveSupport') do
+    words.each { |word| active_support_underscore(word) }
   end
 
-  x.report('Slow underscore') do
-    words.each { |word| active_support_underscore(word) }
+  x.report('fast_underscore') do
+    words.each(&:underscore)
   end
 
   x.compare!
