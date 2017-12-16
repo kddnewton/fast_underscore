@@ -1,5 +1,8 @@
 # `String#underscore` Ruby Extension
 
+[![Build Status](https://travis-ci.org/kddeisz/fast_underscore.svg?branch=master)](https://travis-ci.org/kddeisz/fast_underscore)
+[![Gem Version](https://img.shields.io/gem/v/fast_underscore.svg)](fast_underscore)
+
 `fast_underscore` is a simple C extension which provides a fast implementation of [Active Support's `String#underscore` method](http://api.rubyonrails.org/classes/String.html#method-i-underscore).
 
 ## Do I need this?

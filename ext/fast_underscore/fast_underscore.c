@@ -90,7 +90,9 @@ typedef struct builder {
  */
 static codepoint_t*
 codepoint_build(rb_encoding *encoding) {
-  codepoint_t *codepoint = (codepoint_t *) malloc(sizeof(codepoint_t));
+  codepoint_t *codepoint;
+
+  codepoint = (codepoint_t *) malloc(sizeof(codepoint_t));
   if (codepoint == NULL) {
     return NULL;
   }
@@ -112,7 +114,9 @@ codepoint_free(codepoint_t *codepoint) {
  */
 static builder_t*
 builder_build(long str_len) {
-  builder_t *builder = (builder_t *) malloc(sizeof(builder_t));
+  builder_t *builder;
+
+  builder = (builder_t *) malloc(sizeof(builder_t));
   if (builder == NULL) {
     return NULL;
   }
@@ -181,7 +185,9 @@ builder_segment_push(builder_t *builder, codepoint_t *codepoint) {
  */
 static void
 builder_segment_copy(builder_t *builder, long size) {
-  for (long idx = 0; idx < size; idx++) {
+  long idx;
+
+  for (idx = 0; idx < size; idx++) {
     builder_result_push_literal(builder, builder->segment[idx]);
   }
 }
@@ -345,13 +351,21 @@ builder_free(builder_t *builder) {
  */
 static VALUE
 rb_str_underscore(VALUE self, VALUE rb_string) {
-  rb_encoding *encoding = rb_enc_from_index(ENCODING_GET(rb_string));
+  VALUE resultant;
+  rb_encoding *encoding;
 
-  char *string = RSTRING_PTR(rb_string);
-  char *end = RSTRING_END(rb_string);
+  char *string;
+  char *end;
 
-  builder_t *builder = builder_build(RSTRING_LEN(rb_string) * 2);
-  codepoint_t *codepoint = codepoint_build(encoding);
+  builder_t *builder;
+  codepoint_t *codepoint;
+
+  encoding = rb_enc_from_index(ENCODING_GET(rb_string));
+  string = RSTRING_PTR(rb_string);
+  end = RSTRING_END(rb_string);
+
+  builder = builder_build(RSTRING_LEN(rb_string) * 2);
+  codepoint = codepoint_build(encoding);
 
   while (string < end) {
     codepoint->character = rb_enc_codepoint_len(string, end, &codepoint->size, encoding);
@@ -360,8 +374,9 @@ rb_str_underscore(VALUE self, VALUE rb_string) {
   }
   builder_flush(builder);
 
-  VALUE resultant = rb_enc_str_new(builder->result, builder->result_size, encoding);
+  resultant = rb_enc_str_new(builder->result, builder->result_size, encoding);
   builder_free(builder);
+  codepoint_free(codepoint);
 
   return resultant;
 }
