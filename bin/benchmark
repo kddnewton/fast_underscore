@@ -1,0 +1,30 @@
+#!/usr/bin/env ruby
+
+require 'bundler/setup'
+require 'benchmark/ips'
+require 'fast_underscore'
+
+def active_support_underscore(camel_cased_word)
+  return camel_cased_word unless /[A-Z-]|::/.match?(camel_cased_word)
+  word = camel_cased_word.to_s.gsub('::'.freeze, '/'.freeze)
+  word.gsub!(/([A-Z\d]+)([A-Z][a-z])/, '\1_\2'.freeze)
+  word.gsub!(/([a-z\d])([A-Z])/, '\1_\2'.freeze)
+  word.tr!('-'.freeze, '_'.freeze)
+  word.downcase!
+  word
+end
+
+source = %w[_ - : /] + ('a'..'z').to_a + ('A'..'Z').to_a + ('0'..'9').to_a
+words = 500.times.map { Array.new(100) { source.sample }.join }
+
+Benchmark.ips do |x|
+  x.report('Fast underscore') do
+    words.each(&:underscore)
+  end
+
+  x.report('Slow underscore') do
+    words.each { |word| active_support_underscore(word) }
+  end
+
+  x.compare!
+end

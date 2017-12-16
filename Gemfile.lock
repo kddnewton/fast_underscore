@@ -6,6 +6,7 @@ PATH
 GEM
   remote: https://rubygems.org/
   specs:
+    benchmark-ips (2.7.2)
     minitest (5.10.3)
     rake (12.3.0)
     rake-compiler (0.9.9)
@@ -15,6 +16,7 @@ PLATFORMS
   ruby
 
 DEPENDENCIES
+  benchmark-ips
   bundler (~> 1)
   fast_underscore!
   minitest (~> 5)

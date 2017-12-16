@@ -1,6 +1,5 @@
 #include <ruby.h>
 #include <ruby/encoding.h>
-#include <stdio.h>
 #include <stdlib.h>
 
 int codepoint_is_lower_alpha(unsigned int codepoint) {
