@@ -20,10 +20,6 @@ typedef struct builder {
   enum state {
     STATE_DEFAULT,
     STATE_COLON,
-    STATE_LOWER,
-    STATE_DIGIT_UPPER,
-    STATE_DIGIT_START,
-    STATE_DIGIT_MULTI,
     STATE_UPPER_END,
     STATE_UPPER_START
   } state;
@@ -68,9 +64,9 @@ builder_t* builder_build(long str_len) {
 void builder_result_push(builder_t *builder, unsigned int codepoint) {
   if (codepoint_is_upper_alpha(codepoint)) {
     builder->result[builder->result_size++] = (char) codepoint - 'A' + 'a';
-  } else {
-    builder->result[builder->result_size++] = (char) codepoint;
+    return;
   }
+  builder->result[builder->result_size++] = (char) codepoint;
 }
 
 void builder_segment_start(builder_t *builder, unsigned int codepoint) {
@@ -99,10 +95,6 @@ void builder_flush(builder_t *builder) {
     case STATE_COLON:
       builder_result_push(builder, ':');
       return;
-    case STATE_LOWER:
-    case STATE_DIGIT_UPPER:
-    case STATE_DIGIT_START:
-    case STATE_DIGIT_MULTI:
     case STATE_UPPER_END:
     case STATE_UPPER_START:
       builder_segment_copy(builder, builder->segment_size);
@@ -147,17 +139,7 @@ void builder_next(builder_t *builder, unsigned int codepoint) {
         builder->state = STATE_COLON;
         return;
       }
-      if (codepoint_is_lower_alpha(codepoint)) {
-        builder_segment_start(builder, codepoint);
-        builder->state = STATE_LOWER;
-        return;
-      }
-      if (codepoint_is_digit(codepoint)) {
-        builder_segment_start(builder, codepoint);
-        builder->state = STATE_DIGIT_START;
-        return;
-      }
-      if (codepoint_is_upper_alpha(codepoint)) {
+      if (codepoint_is_digit(codepoint) || codepoint_is_upper_alpha(codepoint)) {
         builder_segment_start(builder, codepoint);
         builder->state = STATE_UPPER_START;
         return;
@@ -175,52 +157,7 @@ void builder_next(builder_t *builder, unsigned int codepoint) {
       builder_restart(builder);
       builder_next(builder, codepoint);
       return;
-    case STATE_LOWER:
-      if (codepoint_is_upper_alpha(codepoint)) {
-        builder_segment_copy(builder, 1);
-        builder_result_push(builder, '_');
-        builder_restart(builder);
-        builder_next(builder, codepoint);
-        return;
-      }
-
-      builder_segment_copy(builder, 1);
-      builder_restart(builder);
-      builder_next(builder, codepoint);
-      return;
-    case STATE_DIGIT_START:
-      if (codepoint_is_upper_alpha(codepoint)) {
-        builder_segment_push(builder, codepoint);
-        builder->state = STATE_DIGIT_UPPER;
-        return;
-      }
-      if (codepoint_is_digit(codepoint)) {
-        builder_segment_push(builder, codepoint);
-        builder->state = STATE_DIGIT_MULTI;
-        return;
-      }
-
-      builder_segment_copy(builder, 1);
-      builder_restart(builder);
-      builder_next(builder, codepoint);
-      return;
-    case STATE_DIGIT_UPPER:
-      if (codepoint_is_lower_alpha(codepoint)) {
-        builder_segment_copy(builder, builder->segment_size - 1);
-        builder_result_push(builder, '_');
-        builder_result_push(builder, builder->segment[builder->segment_size - 1]);
-        builder_restart(builder);
-        builder_next(builder, codepoint);
-        break;
-      }
-
-      builder_segment_copy(builder, builder->segment_size - 1);
-      builder_result_push(builder, '_');
-      builder_result_push(builder, builder->segment[builder->segment_size - 1]);
-      builder_restart(builder);
-      builder_next(builder, codepoint);
-      break;
-    case STATE_DIGIT_MULTI:
+    case STATE_UPPER_START:
       if (codepoint_is_digit(codepoint)) {
         builder_segment_push(builder, codepoint);
         return;
@@ -238,7 +175,7 @@ void builder_next(builder_t *builder, unsigned int codepoint) {
     case STATE_UPPER_END:
       if (codepoint_is_digit(codepoint)) {
         builder_segment_push(builder, codepoint);
-        builder->state = STATE_DIGIT_MULTI;
+        builder->state = STATE_UPPER_START;
         return;
       }
       if (codepoint_is_upper_alpha(codepoint)) {
@@ -251,22 +188,6 @@ void builder_next(builder_t *builder, unsigned int codepoint) {
         builder_result_push(builder, builder->segment[builder->segment_size - 1]);
         builder_restart(builder);
         builder_next(builder, codepoint);
-        return;
-      }
-
-      builder_segment_copy(builder, builder->segment_size);
-      builder_restart(builder);
-      builder_next(builder, codepoint);
-      return;
-    case STATE_UPPER_START:
-      if (codepoint_is_digit(codepoint)) {
-        builder_segment_push(builder, codepoint);
-        builder->state = STATE_DIGIT_MULTI;
-        return;
-      }
-      if (codepoint_is_upper_alpha(codepoint)) {
-        builder_segment_push(builder, codepoint);
-        builder->state = STATE_UPPER_END;
         return;
       }
 
