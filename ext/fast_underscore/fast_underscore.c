@@ -3,20 +3,29 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-// return camel_cased_word unless /[A-Z-]|::/.match?(camel_cased_word)
-// word = camel_cased_word.to_s.gsub('::'.freeze, '/'.freeze)
-// word.gsub!(/([A-Z\d]+)([A-Z][a-z])/, '\1_\2'.freeze)
-// word.gsub!(/([a-z\d])([A-Z])/, '\1_\2'.freeze)
-// word.tr!('-'.freeze, '_'.freeze)
-// word.downcase!
-// word
+int codepoint_is_lower_alpha(unsigned int codepoint) {
+  return codepoint >= 'a' && codepoint <= 'z';
+}
+
+int codepoint_is_upper_alpha(unsigned int codepoint) {
+  return codepoint >= 'A' && codepoint <= 'Z';
+}
+
+int codepoint_is_digit(unsigned int codepoint) {
+  return codepoint >= '0' && codepoint <= '9';
+}
 
 typedef struct builder {
   // The state of the DFA in which is the builder
   enum state {
     STATE_DEFAULT,
-    STATE_SINGLE_COLON,
-    STATE_PRE_CAPITAL
+    STATE_COLON,
+    STATE_LOWER,
+    STATE_DIGIT_UPPER,
+    STATE_DIGIT_START,
+    STATE_DIGIT_MULTI,
+    STATE_UPPER_END,
+    STATE_UPPER_START
   } state;
 
   // The current segment of text that we're analyzing
@@ -57,7 +66,11 @@ builder_t* builder_build(long str_len) {
 }
 
 void builder_result_push(builder_t *builder, unsigned int codepoint) {
-  builder->result[builder->result_size++] = (char) codepoint;
+  if (codepoint_is_upper_alpha(codepoint)) {
+    builder->result[builder->result_size++] = (char) codepoint - 'A' + 'a';
+  } else {
+    builder->result[builder->result_size++] = (char) codepoint;
+  }
 }
 
 void builder_segment_start(builder_t *builder, unsigned int codepoint) {
@@ -65,63 +78,203 @@ void builder_segment_start(builder_t *builder, unsigned int codepoint) {
   builder->segment_size = 1;
 }
 
+void builder_segment_push(builder_t *builder, unsigned int codepoint) {
+  builder->segment[builder->segment_size++] = (char) codepoint;
+}
+
+void builder_segment_copy(builder_t *builder, long size) {
+  for (long idx = 0; idx < size; idx++) {
+    builder_result_push(builder, builder->segment[idx]);
+  }
+}
+
+void builder_restart(builder_t *builder) {
+  builder->state = STATE_DEFAULT;
+  builder->segment_size = 0;
+}
+
 void builder_flush(builder_t *builder) {
   switch (builder->state) {
     case STATE_DEFAULT: return;
-    case STATE_SINGLE_COLON:
+    case STATE_COLON:
       builder_result_push(builder, ':');
       return;
-    case STATE_PRE_CAPITAL:
-      builder_result_push(builder, builder->segment[0]);
+    case STATE_LOWER:
+    case STATE_DIGIT_UPPER:
+    case STATE_DIGIT_START:
+    case STATE_DIGIT_MULTI:
+    case STATE_UPPER_END:
+    case STATE_UPPER_START:
+      builder_segment_copy(builder, builder->segment_size);
       return;
   }
 }
 
 void builder_next(builder_t *builder, unsigned int codepoint) {
-  // for (int idx = 0; idx < builder->result_size; idx++) {
-  //   printf("%c", builder->result[idx]);
+  // printf("READING = %c\n", codepoint);
+  //
+  // printf("STATE = ");
+  // switch (builder->state) {
+  //   case STATE_DEFAULT:     printf("STATE_DEFAULT"); break;
+  //   case STATE_COLON:       printf("STATE_COLON"); break;
+  //   case STATE_UPPER_START: printf("STATE_UPPER_START"); break;
+  //   case STATE_UPPER_END:   printf("STATE_UPPER_END"); break;
+  //   case STATE_DIGIT_START: printf("STATE_DIGIT_START"); break;
+  //   case STATE_DIGIT_END:   printf("STATE_DIGIT_END"); break;
+  //   case STATE_LOWER:       printf("STATE_LOWER"); break;
   // }
   // printf("\n");
+  //
+  // printf("SEGMENT = ");
+  // for (long idx = 0; idx < builder->segment_size; idx++) {
+  //   printf("%c", builder->segment[idx]);
+  // }
+  // printf("\n");
+  //
+  // printf("RESULTS = ");
+  // for (long idx = 0; idx < builder->result_size; idx++) {
+  //   printf("%c", builder->result[idx]);
+  // }
+  // printf("\n\n");
 
   switch (builder->state) {
     case STATE_DEFAULT:
-      if (codepoint == ':') {
-        builder->state = STATE_SINGLE_COLON;
-        return;
-      }
       if (codepoint == '-') {
         builder_result_push(builder, '_');
         return;
       }
-      if ((codepoint >= 'a' && codepoint <= 'z') || (codepoint >= '0' && codepoint <= '9')) {
+      if (codepoint == ':') {
+        builder->state = STATE_COLON;
+        return;
+      }
+      if (codepoint_is_lower_alpha(codepoint)) {
         builder_segment_start(builder, codepoint);
-        builder->state = STATE_PRE_CAPITAL;
+        builder->state = STATE_LOWER;
         return;
       }
-    case STATE_SINGLE_COLON:
-      switch (codepoint) {
-        case ':':
-          builder_result_push(builder, '/');
-          builder->state = STATE_DEFAULT;
-          return;
+      if (codepoint_is_digit(codepoint)) {
+        builder_segment_start(builder, codepoint);
+        builder->state = STATE_DIGIT_START;
+        return;
       }
-    case STATE_PRE_CAPITAL:
-      builder_result_push(builder, builder->segment[0]);
+      if (codepoint_is_upper_alpha(codepoint)) {
+        builder_segment_start(builder, codepoint);
+        builder->state = STATE_UPPER_START;
+        return;
+      }
+      builder_result_push(builder, codepoint);
+      return;
+    case STATE_COLON:
+      if (codepoint == ':') {
+        builder_result_push(builder, '/');
+        builder_restart(builder);
+        return;
+      }
 
-      if (codepoint >= 'A' && codepoint <= 'Z') {
+      builder_result_push(builder, ':');
+      builder_restart(builder);
+      builder_next(builder, codepoint);
+      return;
+    case STATE_LOWER:
+      if (codepoint_is_upper_alpha(codepoint)) {
+        builder_segment_copy(builder, 1);
         builder_result_push(builder, '_');
-        builder_result_push(builder, codepoint);
-        builder->state = STATE_DEFAULT;
-        return;
-      } else {
-        builder->state = STATE_DEFAULT;
+        builder_restart(builder);
         builder_next(builder, codepoint);
         return;
       }
-  }
 
-  builder_result_push(builder, codepoint);
-  builder->state = STATE_DEFAULT;
+      builder_segment_copy(builder, 1);
+      builder_restart(builder);
+      builder_next(builder, codepoint);
+      return;
+    case STATE_DIGIT_START:
+      if (codepoint_is_upper_alpha(codepoint)) {
+        builder_segment_push(builder, codepoint);
+        builder->state = STATE_DIGIT_UPPER;
+        return;
+      }
+      if (codepoint_is_digit(codepoint)) {
+        builder_segment_push(builder, codepoint);
+        builder->state = STATE_DIGIT_MULTI;
+        return;
+      }
+
+      builder_segment_copy(builder, 1);
+      builder_restart(builder);
+      builder_next(builder, codepoint);
+      return;
+    case STATE_DIGIT_UPPER:
+      if (codepoint_is_lower_alpha(codepoint)) {
+        builder_segment_copy(builder, builder->segment_size - 1);
+        builder_result_push(builder, '_');
+        builder_result_push(builder, builder->segment[builder->segment_size - 1]);
+        builder_restart(builder);
+        builder_next(builder, codepoint);
+        break;
+      }
+
+      builder_segment_copy(builder, builder->segment_size - 1);
+      builder_result_push(builder, '_');
+      builder_result_push(builder, builder->segment[builder->segment_size - 1]);
+      builder_restart(builder);
+      builder_next(builder, codepoint);
+      break;
+    case STATE_DIGIT_MULTI:
+      if (codepoint_is_digit(codepoint)) {
+        builder_segment_push(builder, codepoint);
+        return;
+      }
+      if (codepoint_is_upper_alpha(codepoint)) {
+        builder_segment_push(builder, codepoint);
+        builder->state = STATE_UPPER_END;
+        return;
+      }
+
+      builder_segment_copy(builder, builder->segment_size);
+      builder_restart(builder);
+      builder_next(builder, codepoint);
+      return;
+    case STATE_UPPER_END:
+      if (codepoint_is_digit(codepoint)) {
+        builder_segment_push(builder, codepoint);
+        builder->state = STATE_DIGIT_MULTI;
+        return;
+      }
+      if (codepoint_is_upper_alpha(codepoint)) {
+        builder_segment_push(builder, codepoint);
+        return;
+      }
+      if (codepoint_is_lower_alpha(codepoint)) {
+        builder_segment_copy(builder, builder->segment_size - 1);
+        builder_result_push(builder, '_');
+        builder_result_push(builder, builder->segment[builder->segment_size - 1]);
+        builder_restart(builder);
+        builder_next(builder, codepoint);
+        return;
+      }
+
+      builder_segment_copy(builder, builder->segment_size);
+      builder_restart(builder);
+      builder_next(builder, codepoint);
+      return;
+    case STATE_UPPER_START:
+      if (codepoint_is_digit(codepoint)) {
+        builder_segment_push(builder, codepoint);
+        builder->state = STATE_DIGIT_MULTI;
+        return;
+      }
+      if (codepoint_is_upper_alpha(codepoint)) {
+        builder_segment_push(builder, codepoint);
+        builder->state = STATE_UPPER_END;
+        return;
+      }
+
+      builder_segment_copy(builder, builder->segment_size);
+      builder_restart(builder);
+      builder_next(builder, codepoint);
+      return;
+  }
 }
 
 void builder_free(builder_t *builder) {
@@ -149,10 +302,15 @@ static VALUE rb_str_underscore(VALUE rb_string) {
   }
   builder_flush(builder);
 
-  VALUE result = rb_enc_str_new(builder->result, builder->result_size, encoding);
+  char result[builder->result_size];
+  for (long idx = 0; idx < builder->result_size; idx++) {
+    result[idx] = (char) builder->result[idx];
+  }
+
+  VALUE resultant = rb_enc_str_new(result, builder->result_size, encoding);
   builder_free(builder);
 
-  return result;
+  return resultant;
 }
 
 void Init_fast_underscore(void) {
