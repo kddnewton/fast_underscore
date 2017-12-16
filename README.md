@@ -2,6 +2,23 @@
 
 `fast_underscore` is a simple C extension which provides a fast implementation of [Active Support's `String#underscore` method](http://api.rubyonrails.org/classes/String.html#method-i-underscore).
 
+## Is it fast?
+
+At last check, these were the benchmarks (obtained by running `bin/benchmark`):
+
+```
+Warming up --------------------------------------
+       ActiveSupport     2.000  i/100ms
+      FastUnderscore    64.000  i/100ms
+Calculating -------------------------------------
+       ActiveSupport     28.839  (± 6.9%) i/s -    144.000  in   5.019140s
+      FastUnderscore    650.151  (± 7.7%) i/s -      3.264k in   5.056094s
+
+Comparison:
+      FastUnderscore:      650.2 i/s
+       ActiveSupport:       28.8 i/s - 22.54x  slower
+```
+
 ## Installation
 
 Add this line to your application's Gemfile:
