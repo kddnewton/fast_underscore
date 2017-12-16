@@ -59,7 +59,9 @@ typedef struct codepoint {
 } codepoint_t;
 
 /**
- * A struct for tracking the built string as it gets converted.
+ * A struct for tracking the built string as it gets converted. Maintains an
+ * internal DFA for transitioning through various inputs to match certain
+ * patterns that need to be separated with underscores.
  */
 typedef struct builder {
   // The state of the DFA in which is the builder
@@ -194,6 +196,8 @@ builder_restart(builder_t *builder) {
   builder->segment_size = 0;
 }
 
+static void builder_next(builder_t *builder, codepoint_t *codepoint);
+
 /**
  * Pull the remaining content out of the cached segment in case we don't end
  * parsing while not in the default state.
@@ -213,6 +217,92 @@ builder_flush(builder_t *builder) {
 }
 
 /**
+ * Perform transitions from the STATE_DEFAULT state.
+ */
+static inline void
+builder_default_transition(builder_t *builder, codepoint_t *codepoint) {
+  if (codepoint->character == '-') {
+    builder_result_push_literal(builder, '_');
+    return;
+  }
+  if (codepoint->character == ':') {
+    builder->state = STATE_COLON;
+    return;
+  }
+  if (codepoint_is_digit(codepoint) || codepoint_is_upper(codepoint)) {
+    builder->segment[0] = (char) codepoint->character;
+    builder->segment_size = 1;
+    builder->state = STATE_UPPER_START;
+    return;
+  }
+  builder_result_push(builder, codepoint);
+}
+
+/**
+ * Perform transitions from the STATE_COLON state.
+ */
+static inline void
+builder_colon_transition(builder_t *builder, codepoint_t *codepoint) {
+  if (codepoint->character == ':') {
+    builder_result_push_literal(builder, '/');
+    builder_restart(builder);
+    return;
+  }
+
+  builder_result_push_literal(builder, ':');
+  builder_restart(builder);
+  builder_next(builder, codepoint);
+}
+
+/**
+ * Perform transitions from the STATE_UPPER_START state.
+ */
+static inline void
+builder_upper_start_transition(builder_t *builder, codepoint_t *codepoint) {
+  if (codepoint_is_digit(codepoint)) {
+    builder_segment_push(builder, codepoint);
+    return;
+  }
+  if (codepoint_is_upper(codepoint)) {
+    builder_segment_push(builder, codepoint);
+    builder->state = STATE_UPPER_END;
+    return;
+  }
+
+  builder_segment_copy(builder, builder->segment_size);
+  builder_restart(builder);
+  builder_next(builder, codepoint);
+}
+
+/**
+ * Perform transitions from the STATE_UPPER_END state.
+ */
+static inline void
+builder_upper_end_transition(builder_t *builder, codepoint_t *codepoint) {
+  if (codepoint_is_digit(codepoint)) {
+    builder_segment_push(builder, codepoint);
+    builder->state = STATE_UPPER_START;
+    return;
+  }
+  if (codepoint_is_upper(codepoint)) {
+    builder_segment_push(builder, codepoint);
+    return;
+  }
+  if (codepoint_is_lower(codepoint)) {
+    builder_segment_copy(builder, builder->segment_size - 1);
+    builder_result_push_literal(builder, '_');
+    builder_result_push_literal(builder, builder->segment[builder->segment_size - 1]);
+    builder_restart(builder);
+    builder_next(builder, codepoint);
+    return;
+  }
+
+  builder_segment_copy(builder, builder->segment_size);
+  builder_restart(builder);
+  builder_next(builder, codepoint);
+}
+
+/**
  * Accept the next codepoint, which will move the `builder_t` struct into the
  * next state.
  */
@@ -220,71 +310,13 @@ static void
 builder_next(builder_t *builder, codepoint_t *codepoint) {
   switch (builder->state) {
     case STATE_DEFAULT:
-      if (codepoint->character == '-') {
-        builder_result_push_literal(builder, '_');
-        return;
-      }
-      if (codepoint->character == ':') {
-        builder->state = STATE_COLON;
-        return;
-      }
-      if (codepoint_is_digit(codepoint) || codepoint_is_upper(codepoint)) {
-        builder->segment[0] = (char) codepoint->character;
-        builder->segment_size = 1;
-        builder->state = STATE_UPPER_START;
-        return;
-      }
-      builder_result_push(builder, codepoint);
-      return;
+      return builder_default_transition(builder, codepoint);
     case STATE_COLON:
-      if (codepoint->character == ':') {
-        builder_result_push_literal(builder, '/');
-        builder_restart(builder);
-        return;
-      }
-
-      builder_result_push_literal(builder, ':');
-      builder_restart(builder);
-      builder_next(builder, codepoint);
-      return;
+      return builder_colon_transition(builder, codepoint);
     case STATE_UPPER_START:
-      if (codepoint_is_digit(codepoint)) {
-        builder_segment_push(builder, codepoint);
-        return;
-      }
-      if (codepoint_is_upper(codepoint)) {
-        builder_segment_push(builder, codepoint);
-        builder->state = STATE_UPPER_END;
-        return;
-      }
-
-      builder_segment_copy(builder, builder->segment_size);
-      builder_restart(builder);
-      builder_next(builder, codepoint);
-      return;
+      return builder_upper_start_transition(builder, codepoint);
     case STATE_UPPER_END:
-      if (codepoint_is_digit(codepoint)) {
-        builder_segment_push(builder, codepoint);
-        builder->state = STATE_UPPER_START;
-        return;
-      }
-      if (codepoint_is_upper(codepoint)) {
-        builder_segment_push(builder, codepoint);
-        return;
-      }
-      if (codepoint_is_lower(codepoint)) {
-        builder_segment_copy(builder, builder->segment_size - 1);
-        builder_result_push_literal(builder, '_');
-        builder_result_push_literal(builder, builder->segment[builder->segment_size - 1]);
-        builder_restart(builder);
-        builder_next(builder, codepoint);
-        return;
-      }
-
-      builder_segment_copy(builder, builder->segment_size);
-      builder_restart(builder);
-      builder_next(builder, codepoint);
-      return;
+      return builder_upper_end_transition(builder, codepoint);
   }
 }
 
