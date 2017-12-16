@@ -43,7 +43,7 @@ PLATFORMS
 
 DEPENDENCIES
   activesupport (~> 5.1)
-  benchmark-ips
+  benchmark-ips (~> 2)
   bundler (~> 1)
   fast_underscore!
   minitest (~> 5)
