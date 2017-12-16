@@ -3,8 +3,8 @@ require "test_helper"
 class FastUnderscoreTest < Minitest::Test
   def test_underscore
     assert_equal 'foo/bar_baz', 'foo::bar-baz'.underscore
-    # assert_equal 'foo_bar_baz', 'FooBarBaz'.underscore
-    # assert_equal 'foo123_bar', 'Foo123Bar'.underscore
+    assert_equal 'foo_bar_baz', 'FooBarBaz'.underscore
+    assert_equal 'foo123_bar', 'Foo123Bar'.underscore
   end
 
   def test_fuzzing
@@ -26,7 +26,7 @@ class FastUnderscoreTest < Minitest::Test
     return camel_cased_word unless /[A-Z-]|::/.match?(camel_cased_word)
     word = camel_cased_word.to_s.gsub('::'.freeze, '/'.freeze)
     word.gsub!(/([A-Z\d]+)([A-Z][a-z])/, '\1_\2'.freeze)
-    # word.gsub!(/([a-z\d])([A-Z])/, '\1_\2'.freeze)
+    word.gsub!(/([a-z\d])([A-Z])/, '\1_\2'.freeze)
     word.tr!('-'.freeze, '_'.freeze)
     word.downcase!
     word

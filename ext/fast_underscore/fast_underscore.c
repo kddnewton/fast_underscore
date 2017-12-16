@@ -31,6 +31,10 @@ typedef struct builder {
   // The resultant text from the underscore operation
   char *result;
   long result_size;
+
+  // Whether or not the last pushed result character should cause the following
+  // one to be spaced by an underscore
+  int pushNext;
 } builder_t;
 
 builder_t* builder_build(long str_len) {
@@ -57,15 +61,28 @@ builder_t* builder_build(long str_len) {
 
   builder->segment_size = 0;
   builder->result_size = 0;
+  builder->pushNext = 0;
 
   return builder;
 }
 
 void builder_result_push(builder_t *builder, unsigned int codepoint) {
   if (codepoint_is_upper_alpha(codepoint)) {
+    if (builder->pushNext == 1) {
+      builder->pushNext = 0;
+      builder->result[builder->result_size++] = '_';
+    }
+
     builder->result[builder->result_size++] = (char) codepoint - 'A' + 'a';
     return;
   }
+
+  if (codepoint_is_lower_alpha(codepoint) || codepoint_is_digit(codepoint)) {
+    builder->pushNext = 1;
+  } else {
+    builder->pushNext = 0;
+  }
+
   builder->result[builder->result_size++] = (char) codepoint;
 }
 
@@ -103,32 +120,6 @@ void builder_flush(builder_t *builder) {
 }
 
 void builder_next(builder_t *builder, unsigned int codepoint) {
-  // printf("READING = %c\n", codepoint);
-  //
-  // printf("STATE = ");
-  // switch (builder->state) {
-  //   case STATE_DEFAULT:     printf("STATE_DEFAULT"); break;
-  //   case STATE_COLON:       printf("STATE_COLON"); break;
-  //   case STATE_UPPER_START: printf("STATE_UPPER_START"); break;
-  //   case STATE_UPPER_END:   printf("STATE_UPPER_END"); break;
-  //   case STATE_DIGIT_START: printf("STATE_DIGIT_START"); break;
-  //   case STATE_DIGIT_END:   printf("STATE_DIGIT_END"); break;
-  //   case STATE_LOWER:       printf("STATE_LOWER"); break;
-  // }
-  // printf("\n");
-  //
-  // printf("SEGMENT = ");
-  // for (long idx = 0; idx < builder->segment_size; idx++) {
-  //   printf("%c", builder->segment[idx]);
-  // }
-  // printf("\n");
-  //
-  // printf("RESULTS = ");
-  // for (long idx = 0; idx < builder->result_size; idx++) {
-  //   printf("%c", builder->result[idx]);
-  // }
-  // printf("\n\n");
-
   switch (builder->state) {
     case STATE_DEFAULT:
       if (codepoint == '-') {
