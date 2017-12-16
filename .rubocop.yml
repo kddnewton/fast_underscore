@@ -1,0 +1,11 @@
+AllCops:
+  DisplayCopNames: true
+  DisplayStyleGuide: true
+  TargetRubyVersion: 2.4
+  Exclude:
+  - 'bin/**/*'
+  - 'vendor/**/*'
+  - 'tmp/**/*'
+
+Style/PerlBackrefs:
+  Enabled: false

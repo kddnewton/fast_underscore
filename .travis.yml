@@ -3,3 +3,4 @@ rvm: 2.5.0
 branches:
   only: master
 cache: bundler
+script: bin/rubocop && bin/rake
