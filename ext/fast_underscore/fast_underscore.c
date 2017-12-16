@@ -2,31 +2,51 @@
 #include <ruby/encoding.h>
 #include <stdlib.h>
 
+/**
+ * true if the given codepoint is a lowercase ascii character.
+ */
 static int
 character_is_lower(unsigned int character) {
   return character >= 'a' && character <= 'z';
 }
 
+/**
+ * true if the given codepoint is a uppercase ascii character.
+ */
 static int
 character_is_upper(unsigned int character) {
   return character >= 'A' && character <= 'Z';
 }
 
+/**
+ * true if the given codepoint is an ascii digit.
+ */
 static int
 character_is_digit(unsigned int character) {
   return character >= '0' && character <= '9';
 }
 
+/**
+ * Macros for extracting the character out of the `codepoint_t` struct.
+ */
 #define codepoint_is_lower(codepoint) character_is_lower(codepoint->character)
 #define codepoint_is_upper(codepoint) character_is_upper(codepoint->character)
 #define codepoint_is_digit(codepoint) character_is_digit(codepoint->character)
 
+/**
+ * Macros for shortcuts to call into the `builder_result_push_char` function.
+ */
 #define builder_result_push(builder, codepoint) \
   builder_result_push_char(builder, codepoint->character, codepoint->size, \
                            codepoint->encoding)
 #define builder_result_push_literal(builder, character) \
   builder_result_push_char(builder, character, 1, NULL)
 
+/**
+ * A struct for keeping track of a codepoint from the original string. Maintains
+ * the original encoding, the actual character codepoint, and the size of the
+ * codepoint.
+ */
 typedef struct codepoint {
   // The encoding of the character
   rb_encoding *encoding;
@@ -38,6 +58,9 @@ typedef struct codepoint {
   int size;
 } codepoint_t;
 
+/**
+ * A struct for tracking the built string as it gets converted.
+ */
 typedef struct builder {
   // The state of the DFA in which is the builder
   enum state {
@@ -60,6 +83,9 @@ typedef struct builder {
   int pushNext;
 } builder_t;
 
+/**
+ * Allocate and initialize a `codepoint_t` struct.
+ */
 static codepoint_t*
 codepoint_build(rb_encoding *encoding) {
   codepoint_t *codepoint = (codepoint_t *) malloc(sizeof(codepoint_t));
@@ -71,11 +97,17 @@ codepoint_build(rb_encoding *encoding) {
   return codepoint;
 }
 
+/**
+ * Free a previously allocated `codepoint_t` struct.
+ */
 static void
 codepoint_free(codepoint_t *codepoint) {
   free(codepoint);
 }
 
+/**
+ * Allocate and initialize a `builder_t` struct.
+ */
 static builder_t*
 builder_build(long str_len) {
   builder_t *builder = (builder_t *) malloc(sizeof(builder_t));
@@ -106,6 +138,10 @@ builder_build(long str_len) {
   return builder;
 }
 
+/**
+ * Push a character onto the resultant string using the given codepoint and
+ * encoding.
+ */
 static void
 builder_result_push_char(builder_t *builder, unsigned int character, int size,
                          rb_encoding *encoding) {
@@ -129,17 +165,18 @@ builder_result_push_char(builder_t *builder, unsigned int character, int size,
   }
 }
 
-static void
-builder_segment_start(builder_t *builder, codepoint_t *codepoint) {
-  builder->segment[0] = (char) codepoint->character;
-  builder->segment_size = 1;
-}
-
+/**
+ * Push the given codepoint onto the builder.
+ */
 static void
 builder_segment_push(builder_t *builder, codepoint_t *codepoint) {
   builder->segment[builder->segment_size++] = (char) codepoint->character;
 }
 
+/**
+ * Copy the given number of characters out of the segment cache onto the result
+ * string.
+ */
 static void
 builder_segment_copy(builder_t *builder, long size) {
   for (long idx = 0; idx < size; idx++) {
@@ -147,12 +184,20 @@ builder_segment_copy(builder_t *builder, long size) {
   }
 }
 
+/**
+ * Restart the `builder_t` back at the default state (because we've hit a
+ * character for which we have no allowed transitions).
+ */
 static void
 builder_restart(builder_t *builder) {
   builder->state = STATE_DEFAULT;
   builder->segment_size = 0;
 }
 
+/**
+ * Pull the remaining content out of the cached segment in case we don't end
+ * parsing while not in the default state.
+ */
 static void
 builder_flush(builder_t *builder) {
   switch (builder->state) {
@@ -167,6 +212,10 @@ builder_flush(builder_t *builder) {
   }
 }
 
+/**
+ * Accept the next codepoint, which will move the `builder_t` struct into the
+ * next state.
+ */
 static void
 builder_next(builder_t *builder, codepoint_t *codepoint) {
   switch (builder->state) {
@@ -180,7 +229,8 @@ builder_next(builder_t *builder, codepoint_t *codepoint) {
         return;
       }
       if (codepoint_is_digit(codepoint) || codepoint_is_upper(codepoint)) {
-        builder_segment_start(builder, codepoint);
+        builder->segment[0] = (char) codepoint->character;
+        builder->segment_size = 1;
         builder->state = STATE_UPPER_START;
         return;
       }
@@ -238,6 +288,9 @@ builder_next(builder_t *builder, codepoint_t *codepoint) {
   }
 }
 
+/**
+ * Frees a previously allocated `builder_t` struct.
+ */
 static void
 builder_free(builder_t *builder) {
   free(builder->segment);
@@ -245,6 +298,19 @@ builder_free(builder_t *builder) {
   free(builder);
 }
 
+/**
+ * Makes an underscored, lowercase form from the expression in the string.
+ *
+ * Changes '::' to '/' to convert namespaces to paths.
+ *
+ *     underscore('ActiveModel')         # => "active_model"
+ *     underscore('ActiveModel::Errors') # => "active_model/errors"
+ *
+ * As a rule of thumb you can think of +underscore+ as the inverse of
+ * #camelize, though there are cases where that does not hold:
+ *
+ *     camelize(underscore('SSLError'))  # => "SslError"
+ */
 static VALUE
 rb_str_underscore(VALUE self, VALUE rb_string) {
   rb_encoding *encoding = rb_enc_from_index(ENCODING_GET(rb_string));
@@ -268,7 +334,11 @@ rb_str_underscore(VALUE self, VALUE rb_string) {
   return resultant;
 }
 
-void Init_fast_underscore(void) {
+/**
+ * Hook into Ruby and define the `FastUnderscore::underscore`.
+ */
+void
+Init_fast_underscore(void) {
   VALUE rb_cFastUnderscore = rb_define_module("FastUnderscore");
   rb_define_singleton_method(rb_cFastUnderscore, "underscore", rb_str_underscore, 1);
 }

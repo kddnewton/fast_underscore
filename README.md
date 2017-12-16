@@ -2,6 +2,10 @@
 
 `fast_underscore` is a simple C extension which provides a fast implementation of [Active Support's `String#underscore` method](http://api.rubyonrails.org/classes/String.html#method-i-underscore).
 
+## Do I need this?
+
+Maybe! Run a stack profiler like [`ruby-prof`](https://github.com/ruby-prof/ruby-prof). If `String#underscore` is coming up near the top of the list, this gem might be for you! If not, you probably don't need it. Either way, your milage may vary depending on the type of strings on which you're calling `underscore`.
+
 ## Is it fast?
 
 At last check, these were the benchmarks (obtained by running `bin/benchmark`):
