@@ -195,10 +195,8 @@ void builder_free(builder_t *builder) {
   free(builder);
 }
 
-#define RSTRING_ENC_GET(rb_string) rb_enc_from_index(ENCODING_GET(rb_string))
-
 static VALUE rb_str_underscore(VALUE rb_string) {
-  rb_encoding *encoding = RSTRING_ENC_GET(rb_string);
+  rb_encoding *encoding = rb_enc_from_index(ENCODING_GET(rb_string));
 
   char *string = RSTRING_PTR(rb_string);
   char *end = RSTRING_END(rb_string);
