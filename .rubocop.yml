@@ -4,7 +4,7 @@ AllCops:
   TargetRubyVersion: 2.4
   Exclude:
   - 'bin/**/*'
-  - 'vendor/**/*'
+  - 'gemfiles/**/*'
   - 'tmp/**/*'
 
 Style/PerlBackrefs:

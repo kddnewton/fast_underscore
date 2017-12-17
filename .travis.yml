@@ -4,3 +4,6 @@ branches:
   only: master
 cache: bundler
 script: bin/rubocop && bin/rake
+gemfile:
+- gemfiles/5.1.gemfile
+- gemfiles/5.2.gemfile
