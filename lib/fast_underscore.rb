@@ -8,14 +8,20 @@ if defined?(ActiveSupport)
     def underscore
       return self unless /[A-Z-]|::/.match?(self)
 
+      response = dup
       acronyms = ActiveSupport::Inflector.inflections.acronym_regex
-      dup.gsub!(/(?:(?<=([A-Za-z\d]))|\b)(#{acronyms})(?=\b|[^a-z])/) do
+
+      response.gsub!(/(?:(?<=([A-Za-z\d]))|\b)(#{acronyms})(?=\b|[^a-z])/) do
         "#{$1 && '_'}#{$2.downcase}"
       end
 
-      FastUnderscore.underscore(self)
+      FastUnderscore.underscore(response)
     end
   end)
+
+  class << ActiveSupport::Inflector
+    define_method(:underscore, &FastUnderscore.method(:underscore))
+  end
 else
   String.prepend(Module.new do
     def underscore

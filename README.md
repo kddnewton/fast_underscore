@@ -7,7 +7,18 @@
 
 ## Do I need this?
 
-Maybe! Run a stack profiler like [`ruby-prof`](https://github.com/ruby-prof/ruby-prof). If `String#underscore` is coming up near the top of the list, this gem might be for you! If not, you probably don't need it. Either way, your milage may vary depending on the type of strings on which you're calling `underscore`.
+Maybe! Run a stack profiler like [`ruby-prof`](https://github.com/ruby-prof/ruby-prof). If `String#underscore` or `ActiveSupport::Inflector#underscore` is coming up near the top of the list, this gem might be for you! If not, you probably don't need it. Either way, your milage may vary depending on the type of strings on which you're calling `underscore`.
+
+## Usage with Rails
+
+`ActiveSupport::Inflector#underscore` is actually used significantly throughout the Rails boot process, so it's best to hook into that process early to get the best results. Place the following lines above the `require 'rails'` line in your `application.rb` file:
+
+```ruby
+require 'active_support'
+require 'fast_underscore'
+```
+
+This will allow Rails to use the faster underscore method while it is booting, which is used for autoloading dependencies, as well as determining table names.
 
 ## Is it fast?
 
