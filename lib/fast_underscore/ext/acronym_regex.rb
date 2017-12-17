@@ -4,15 +4,11 @@ module FastUnderscore
   # Uses ActiveSupport's `acronym_regex` method to construct a memoized pattern
   # for replacing acronyms within strings that need to be underscored.
   module AcronymRegex
-    class << self
-      private
+    def self.pattern
+      return @pattern if defined?(@pattern)
 
-      def pattern
-        return @pattern if defined?(@pattern)
-
-        acronym_regex = ActiveSupport::Inflector.inflections.acronym_regex
-        @pattern ||= /(?:(?<=([A-Za-z\d]))|\b)(#{acronym_regex})(?=\b|[^a-z])/
-      end
+      acronym_regex = ActiveSupport::Inflector.inflections.acronym_regex
+      @pattern ||= /(?:(?<=([A-Za-z\d]))|\b)(#{acronym_regex})(?=\b|[^a-z])/
     end
 
     def underscore

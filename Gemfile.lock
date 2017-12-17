@@ -42,7 +42,7 @@ PLATFORMS
   ruby
 
 DEPENDENCIES
-  activesupport (~> 5.2.0.beta2)
+  activesupport (~> 5.1)
   benchmark-ips (~> 2)
   bundler (~> 1)
   fast_underscore!
