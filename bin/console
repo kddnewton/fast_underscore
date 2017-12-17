@@ -1,6 +1,7 @@
 #!/usr/bin/env ruby
 
 require 'bundler/setup'
+require 'active_support'
 require 'fast_underscore'
 
 require 'irb'
