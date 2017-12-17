@@ -1,7 +1,7 @@
 PATH
   remote: .
   specs:
-    fast_underscore (0.0.3)
+    fast_underscore (0.1.0)
 
 GEM
   remote: https://rubygems.org/
@@ -42,7 +42,7 @@ PLATFORMS
   ruby
 
 DEPENDENCIES
-  activesupport (~> 5.1)
+  activesupport (~> 5.2.0.beta2)
   benchmark-ips (~> 2)
   bundler (~> 1)
   fast_underscore!
