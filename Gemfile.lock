@@ -23,7 +23,7 @@ GEM
     powerpack (0.1.1)
     rainbow (3.0.0)
     rake (12.3.0)
-    rake-compiler (0.9.9)
+    rake-compiler (1.0.4)
       rake
     rubocop (0.52.0)
       parallel (~> 1.10)
@@ -48,7 +48,7 @@ DEPENDENCIES
   fast_underscore!
   minitest (~> 5)
   rake (~> 12)
-  rake-compiler (~> 0)
+  rake-compiler (~> 1)
   rubocop (~> 0.52)
 
 BUNDLED WITH
