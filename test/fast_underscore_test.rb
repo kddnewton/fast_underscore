@@ -1,12 +1,12 @@
 # frozen_string_literal: true
 
-require 'active_support'
 require 'test_helper'
+require 'active_support'
 
 class FastUnderscoreTest < Minitest::Test
   def test_install
     path, = ''.method(:underscore).source_location
-    assert_includes path, 'fast_underscore'
+    assert_nil path
   end
 
   def test_basic
@@ -22,7 +22,7 @@ class FastUnderscoreTest < Minitest::Test
     500.times do
       word = Array.new(100) { source.sample }.join
 
-      expected = ActiveSupport::Inflector.underscore(word)
+      expected = ActiveSupport::Inflector.as_underscore(word)
       actual = word.underscore
 
       assert_equal expected, actual, "Word: #{word}"

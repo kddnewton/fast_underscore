@@ -12,7 +12,7 @@ words = 500.times.map { Array.new(100) { source.sample }.join }
 
 Benchmark.ips do |x|
   x.report('ActiveSupport') do
-    words.each { |word| ActiveSupport::Inflector.underscore(word) }
+    words.each { |word| ActiveSupport::Inflector.as_underscore(word) }
   end
 
   x.report('FastUnderscore') do

@@ -350,7 +350,7 @@ builder_free(builder_t *builder) {
  *     camelize(underscore('SSLError'))  # => "SslError"
  */
 static VALUE
-rb_str_underscore(VALUE self, VALUE rb_string) {
+str_underscore(VALUE rb_string) {
   VALUE resultant;
   rb_encoding *encoding;
 
@@ -382,10 +382,20 @@ rb_str_underscore(VALUE self, VALUE rb_string) {
 }
 
 /**
+ * A singleton method calls with a string that delegates to `str_underscore` to
+ * form an underscored, lowercase form from the expression in the string.
+ */
+static VALUE
+rb_str_underscore(VALUE self, VALUE rb_string) {
+  return str_underscore(rb_string);
+}
+
+/**
  * Hook into Ruby and define the `FastUnderscore::underscore`.
  */
 void
 Init_fast_underscore(void) {
   VALUE rb_cFastUnderscore = rb_define_module("FastUnderscore");
   rb_define_singleton_method(rb_cFastUnderscore, "underscore", rb_str_underscore, 1);
+  rb_define_method(rb_cString, "underscore", str_underscore, 0);
 }
