@@ -13,7 +13,7 @@ Maybe! Run a stack profiler like [`ruby-prof`](https://github.com/ruby-prof/ruby
 
 `ActiveSupport::Inflector#underscore`, in addition to underscoring the input will additionally take into account known acronyms. Since this can't be done at compile time, `FastUnderscore` will detect when `ActiveSupport` is loaded and take advantage of its knowledge of acronyms while still using the native extension.
 
-Since the `#underscore` method is used so much throughout the Rails boot process (for autoloading dependencies, determining table names, determining inverse associations, etc.), it's best to hook into Rails as early as possible. As such, for the best results in your `Gemfile` add `require: false` to the `gem 'fast_underscore'` declaration and add `require 'fast_underscore` to the bottom of `config/boot.rb`.
+Since the `#underscore` method is used so much throughout the Rails boot process (for autoloading dependencies, determining table names, determining inverse associations, etc.), it's best to hook into Rails as early as possible. As such, for the best results in your `Gemfile` add `require: false` to the `gem 'fast_underscore'` declaration and add `require 'fast_underscore'` to the bottom of `config/boot.rb`.
 
 ## Is it fast?
 
