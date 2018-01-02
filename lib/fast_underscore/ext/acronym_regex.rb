@@ -11,19 +11,18 @@ module FastUnderscore
       @pattern ||= /(?:(?<=([A-Za-z\d]))|\b)(#{acronym_regex})(?=\b|[^a-z])/
     end
 
-    def underscore
-      return self unless /[A-Z-]|::/.match?(self)
+    def underscore(string)
+      return string unless /[A-Z-]|::/.match?(string)
 
-      response = dup
+      response = string.dup
       response.gsub!(AcronymRegex.pattern) { "#{$1 && '_'}#{$2.downcase}" }
 
       FastUnderscore.underscore(response)
     end
   end
-end
 
-String.prepend(FastUnderscore::AcronymRegex)
-
-class << ActiveSupport::Inflector
-  define_method(:underscore, &FastUnderscore.method(:underscore))
+  class << ActiveSupport::Inflector
+    alias as_underscore underscore
+    prepend AcronymRegex
+  end
 end

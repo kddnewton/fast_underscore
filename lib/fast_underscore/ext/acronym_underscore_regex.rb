@@ -4,10 +4,10 @@ module FastUnderscore
   # Uses ActiveSupport's `acronym_underscore_regex` method for replacing
   # acronyms within strings that need to be underscored.
   module AcronymUnderscoreRegex
-    def underscore
-      return self unless /[A-Z-]|::/.match?(self)
+    def underscore(string)
+      return string unless /[A-Z-]|::/.match?(string)
 
-      response = dup
+      response = string.dup
       acronyms = ActiveSupport::Inflector.inflections.acronyms_underscore_regex
 
       response.gsub!(acronyms) { "#{$1 && '_'}#{$2.downcase}" }
@@ -15,10 +15,9 @@ module FastUnderscore
       FastUnderscore.underscore(response)
     end
   end
-end
 
-String.prepend(FastUnderscore::AcronymUnderscoreRegex)
-
-class << ActiveSupport::Inflector
-  define_method(:underscore, &FastUnderscore.method(:underscore))
+  class << ActiveSupport::Inflector
+    alias as_underscore underscore
+    prepend AcronymUnderscoreRegex
+  end
 end

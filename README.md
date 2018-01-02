@@ -11,18 +11,15 @@ Maybe! Run a stack profiler like [`ruby-prof`](https://github.com/ruby-prof/ruby
 
 ## Usage with Rails
 
-`ActiveSupport::Inflector#underscore` is actually used significantly throughout the Rails boot process, so it's best to hook into that process early to get the best results. Place the following lines above the `require 'rails'` line in your `application.rb` file:
+`ActiveSupport::Inflector#underscore`, in addition to underscoring the input will additionally take into account known acronyms. Since this can't be done at compile time, `FastUnderscore` will detect when `ActiveSupport` is loaded and take advantage of its knowledge of acronyms while still using the native extension.
 
-```ruby
-require 'active_support'
-require 'fast_underscore'
-```
-
-This will allow Rails to use the faster underscore method while it is booting, which is used for autoloading dependencies, as well as determining table names.
+Since the `#underscore` method is used so much throughout the Rails boot process (for autoloading dependencies, determining table names, determining inverse associations, etc.), it's best to hook into Rails as early as possible. As such, for the best results in your `Gemfile` add `require: false` to the `gem 'fast_underscore'` declaration and add `require 'fast_underscore` to the bottom of `config/boot.rb`.
 
 ## Is it fast?
 
 At last check, these were the benchmarks (obtained by running `bin/benchmark`):
+
+### Rails 5.1.4
 
 ```
 Warming up --------------------------------------
@@ -35,6 +32,21 @@ Calculating -------------------------------------
 Comparison:
       FastUnderscore:      650.2 i/s
        ActiveSupport:       28.8 i/s - 22.54x  slower
+```
+
+### Rails 5.2.0
+
+```
+Warming up --------------------------------------
+       ActiveSupport     5.000  i/100ms
+      FastUnderscore    66.000  i/100ms
+Calculating -------------------------------------
+       ActiveSupport     50.055  (± 6.0%) i/s -    250.000  in   5.016223s
+      FastUnderscore    655.181  (± 2.1%) i/s -      3.300k in   5.038968s
+
+Comparison:
+      FastUnderscore:      655.2 i/s
+       ActiveSupport:       50.1 i/s - 13.09x  slower
 ```
 
 ## Installation
