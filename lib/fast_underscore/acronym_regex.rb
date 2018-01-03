@@ -23,6 +23,6 @@ module FastUnderscore
 
   class << ActiveSupport::Inflector
     alias as_underscore underscore
-    prepend AcronymRegex
+    include AcronymRegex
   end
 end
