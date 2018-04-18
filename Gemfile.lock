@@ -1,20 +1,25 @@
+GIT
+  remote: git://github.com/rails/rails.git
+  revision: 185fce159721b331cc9a0ae17b662373ee0fc95f
+  specs:
+    activesupport (6.0.0.alpha)
+      concurrent-ruby (~> 1.0, >= 1.0.2)
+      i18n (>= 0.7, < 2)
+      minitest (~> 5.1)
+      tzinfo (~> 1.1)
+
 PATH
   remote: .
   specs:
-    fast_underscore (0.3.0)
+    fast_underscore (0.3.1)
 
 GEM
   remote: https://rubygems.org/
   specs:
-    activesupport (5.2.0.rc1)
-      concurrent-ruby (~> 1.0, >= 1.0.2)
-      i18n (~> 0.7)
-      minitest (~> 5.1)
-      tzinfo (~> 1.1)
     ast (2.4.0)
     benchmark-ips (2.7.2)
     concurrent-ruby (1.0.5)
-    i18n (0.9.5)
+    i18n (1.0.1)
       concurrent-ruby (~> 1.0)
     minitest (5.11.3)
     parallel (1.12.1)
@@ -42,7 +47,7 @@ PLATFORMS
   ruby
 
 DEPENDENCIES
-  activesupport (~> 5.2.0.rc1)
+  activesupport!
   benchmark-ips (~> 2)
   bundler (~> 1)
   fast_underscore!

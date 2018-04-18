@@ -11,8 +11,9 @@ module FastUnderscore
   # `String` that allows it to call into the newly redefined `Inflector` method.
   def self.install
     require 'active_support/version'
+    gem_version = Gem::Version.new(ActiveSupport::VERSION::STRING)
 
-    if ActiveSupport::VERSION::MAJOR == 5 && ActiveSupport::VERSION::MINOR >= 2
+    if gem_version >= Gem::Version.new('5.2.0')
       require 'fast_underscore/acronym_underscore_regex'
     else
       require 'fast_underscore/acronym_regex'
