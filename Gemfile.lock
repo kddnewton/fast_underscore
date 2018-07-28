@@ -1,6 +1,6 @@
 GIT
   remote: git://github.com/rails/rails.git
-  revision: 92bb3f6aaaa80fa7add94debbda6373a15f55b64
+  revision: 8741052ba25722283ea057f6f022f16b1931ce3e
   specs:
     activesupport (6.0.0.alpha)
       concurrent-ruby (~> 1.0, >= 1.0.2)
