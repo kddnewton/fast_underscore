@@ -4,4 +4,4 @@ source 'https://rubygems.org'
 
 gemspec
 
-gem 'activesupport', '~> 5.2.1'
+gem 'activesupport', '~> 5.2.2'
