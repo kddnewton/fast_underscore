@@ -24,7 +24,7 @@ GEM
     powerpack (0.1.2)
     rainbow (3.0.0)
     rake (12.3.2)
-    rake-compiler (1.0.6)
+    rake-compiler (1.0.7)
       rake
     rubocop (0.62.0)
       jaro_winkler (~> 1.5.1)
@@ -46,7 +46,7 @@ PLATFORMS
 DEPENDENCIES
   activesupport (~> 5.2.2)
   benchmark-ips (~> 2)
-  bundler (~> 1)
+  bundler (~> 2)
   fast_underscore!
   minitest (~> 5)
   rake (~> 12)
