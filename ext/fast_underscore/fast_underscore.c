@@ -62,6 +62,61 @@ typedef struct codepoint {
  * A struct for tracking the built string as it gets converted. Maintains an
  * internal DFA for transitioning through various inputs to match certain
  * patterns that need to be separated with underscores.
+ *
+ * The internal DFA looks like:
+ *
+ *      ┌ - ┐ ┌ * ┐                            
+ *      │   v │   v                            
+ *    ┌─────────────┐           ┌─────────────┐
+ *    │             │──── : ───>│             │
+ * ──>│   DEFAULT   │<─── : ────│    COLON    │
+ *    │             │<─── * ────│             │
+ *    └─────────────┘           └─────────────┘
+ *      │   ^  ^  ^                            
+ *      │   │  │  └───── a-z ─────────────┐    
+ *   0-9A-Z *  │                          │    
+ *      │   │  └───────── * ────────┐     │    
+ *      v   │                       │     │    
+ *    ┌─────────────┐           ┌─────────────┐
+ *    │             │─── A-Z ──>│             │
+ *    │ UPPER_START │           │  UPPER_END  │
+ *    │             │<── 0-9 ───│             │
+ *    └─────────────┘           └─────────────┘
+ *       │     ^                    ^     │    
+ *       └ 0-9 ┘                    └ A-Z ┘    
+ *
+ * Transitions from DEFAULT:
+ * - On "-", push an "_" and stay on DEFAULT
+ * - On ":", go to COLON
+ * - On a digit or upper, start a buffer with the char and go to UPPER_START
+ * - On anything else, push the char and stay on DEFAULT
+ *
+ * Transitions from COLON:
+ * - On ":", push a "/" and go to DEFAULT
+ * - On anything else, push a ":" and the char and go to DEFAULT
+ *
+ * Transitions from UPPER_START:
+ * - On a digit, push the digit and stay on UPPER_START
+ * - On an upper, push the upper and go to UPPER_END
+ * - On anything else, push the buffer, go to DEFAULT, then handle the char
+ *
+ * Transitions from UPPER_END:
+ * - On a digit, push the digit onto the buffer and go to UPPER_START
+ * - On an upper, push the upper onto the buffer and stay on UPPER_END
+ * - On a lower, push the buffer up to the last char, push an "_", then push
+ *   the last char of the buffer, go to DEFAULT, then handle the char
+ * - On anything else, push the buffer, go to DEFAULT, then handle the char
+ *
+ * These transitions allow us to accomplish the equivalent of the following code
+ * with one pass through the string:
+ *
+ * def underscore(word)
+ *   word.gsub!('::', '/')
+ *   word.gsub!(/([A-Z\d]+)([A-Z][a-z])/, '\1_\2')
+ *   word.gsub!(/([a-z\d])([A-Z])/, '\1_\2')
+ *   word.tr!('-', '_')
+ *   word.downcase!
+ * end
  */
 typedef struct builder {
   // The state of the DFA in which is the builder
@@ -82,7 +137,7 @@ typedef struct builder {
 
   // Whether or not the last pushed result character should cause the following
   // one to be spaced by an underscore
-  int pushNext;
+  int push_next;
 } builder_t;
 
 /**
@@ -139,7 +194,7 @@ builder_build(long str_len) {
 
   builder->segment_size = 0;
   builder->result_size = 0;
-  builder->pushNext = 0;
+  builder->push_next = 0;
 
   return builder;
 }
@@ -152,8 +207,8 @@ static void
 builder_result_push_char(builder_t *builder, unsigned int character, int size,
                          rb_encoding *encoding) {
   if (character_is_upper(character)) {
-    if (builder->pushNext == 1) {
-      builder->pushNext = 0;
+    if (builder->push_next == 1) {
+      builder->push_next = 0;
       builder_result_push_literal(builder, '_');
     }
 
@@ -161,7 +216,7 @@ builder_result_push_char(builder_t *builder, unsigned int character, int size,
     return;
   }
 
-  builder->pushNext = (character_is_lower(character) || character_is_digit(character));
+  builder->push_next = (character_is_lower(character) || character_is_digit(character));
 
   if (encoding == NULL) {
     builder->result[builder->result_size++] = (char) character;
