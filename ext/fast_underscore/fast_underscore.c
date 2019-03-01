@@ -119,7 +119,7 @@ typedef struct codepoint {
  * end
  */
 typedef struct builder {
-  // The state of the DFA in which is the builder
+  // The state of the DFA that the builder is in
   enum state {
     STATE_DEFAULT,
     STATE_COLON,
