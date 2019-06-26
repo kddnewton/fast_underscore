@@ -17,7 +17,7 @@ GEM
     concurrent-ruby (1.1.5)
     i18n (1.6.0)
       concurrent-ruby (~> 1.0)
-    jaro_winkler (1.5.2)
+    jaro_winkler (1.5.3)
     minitest (5.11.3)
     parallel (1.17.0)
     parser (2.6.3.0)
@@ -26,7 +26,7 @@ GEM
     rake (12.3.2)
     rake-compiler (1.0.7)
       rake
-    rubocop (0.71.0)
+    rubocop (0.72.0)
       jaro_winkler (~> 1.5.1)
       parallel (~> 1.10)
       parser (>= 2.6)
