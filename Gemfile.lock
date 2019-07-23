@@ -6,12 +6,12 @@ PATH
 GEM
   remote: https://rubygems.org/
   specs:
-    activesupport (6.0.0.rc1)
+    activesupport (6.0.0.rc2)
       concurrent-ruby (~> 1.0, >= 1.0.2)
       i18n (>= 0.7, < 2)
       minitest (~> 5.1)
       tzinfo (~> 1.1)
-      zeitwerk (~> 2.1, >= 2.1.4)
+      zeitwerk (~> 2.1, >= 2.1.8)
     ast (2.4.0)
     benchmark-ips (2.7.2)
     concurrent-ruby (1.1.5)
@@ -38,13 +38,13 @@ GEM
     tzinfo (1.2.5)
       thread_safe (~> 0.1)
     unicode-display_width (1.6.0)
-    zeitwerk (2.1.5)
+    zeitwerk (2.1.9)
 
 PLATFORMS
   ruby
 
 DEPENDENCIES
-  activesupport (~> 6.0.0.rc1)
+  activesupport (~> 6.0.0.rc2)
   benchmark-ips (~> 2)
   bundler (~> 2)
   fast_underscore!
