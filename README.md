@@ -17,36 +17,19 @@ Since the `#underscore` method is used so much throughout the Rails boot process
 
 ## Is it fast?
 
-At last check, these were the benchmarks (obtained by running `bin/benchmark`):
-
-### Rails 5.1.4
-
-```
-Warming up --------------------------------------
-       ActiveSupport     2.000  i/100ms
-      FastUnderscore    64.000  i/100ms
-Calculating -------------------------------------
-       ActiveSupport     28.839  (± 6.9%) i/s -    144.000  in   5.019140s
-      FastUnderscore    650.151  (± 7.7%) i/s -      3.264k in   5.056094s
-
-Comparison:
-      FastUnderscore:      650.2 i/s
-       ActiveSupport:       28.8 i/s - 22.54x  slower
-```
-
-### Rails 5.2.0
+At last check, these were the benchmarks (obtained by running `bin/bench` with Rails 6.0.2):
 
 ```
 Warming up --------------------------------------
        ActiveSupport     5.000  i/100ms
-      FastUnderscore    66.000  i/100ms
+      FastUnderscore    70.000  i/100ms
 Calculating -------------------------------------
-       ActiveSupport     50.055  (± 6.0%) i/s -    250.000  in   5.016223s
-      FastUnderscore    655.181  (± 2.1%) i/s -      3.300k in   5.038968s
+       ActiveSupport     50.564  (± 9.9%) i/s -    250.000  in   5.012563s
+      FastUnderscore    707.691  (± 1.3%) i/s -      3.570k in   5.045375s
 
 Comparison:
-      FastUnderscore:      655.2 i/s
-       ActiveSupport:       50.1 i/s - 13.09x  slower
+      FastUnderscore:      707.7 i/s
+       ActiveSupport:       50.6 i/s - 14.00x  slower
 ```
 
 ## Installation
