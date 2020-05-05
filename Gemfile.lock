@@ -13,7 +13,7 @@ GEM
       tzinfo (~> 1.1)
       zeitwerk (~> 2.2)
     ast (2.4.0)
-    benchmark-ips (2.8.0)
+    benchmark-ips (2.8.2)
     concurrent-ruby (1.1.6)
     i18n (1.8.2)
       concurrent-ruby (~> 1.0)
