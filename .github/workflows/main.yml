@@ -6,8 +6,17 @@ jobs:
   ci:
     name: CI
     runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        gemfile:
+        - "5.1"
+        - "5.2"
+        - "6.0"
+        - "6.1"
     env:
       CI: true
+      BUNDLE_GEMFILE: gemfiles/${{ matrix.gemfile }}.gemfile
     steps:
     - uses: actions/checkout@master
     - uses: ruby/setup-ruby@v1
