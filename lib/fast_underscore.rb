@@ -18,7 +18,9 @@ module FastUnderscore
       return string unless /[A-Z-]|::/.match?(string)
 
       response = string.dup
-      response.gsub!(AcronymRegex.pattern) { "#{$1 && '_'}#{$2.downcase}" }
+      response.gsub!(ActiveSupportInflectorOldPatch.pattern) do
+        "#{$1 && '_'}#{$2.downcase}"
+      end
 
       FastUnderscore.underscore(response)
     end
