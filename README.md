@@ -5,16 +5,6 @@
 
 `fast_underscore` is a C extension that provides a fast implementation of [ActiveSupport's `String#underscore` method](http://api.rubyonrails.org/classes/String.html#method-i-underscore).
 
-## Do I need this?
-
-Maybe! Run a stack profiler like [`ruby-prof`](https://github.com/ruby-prof/ruby-prof). If `String#underscore` or `ActiveSupport::Inflector#underscore` is coming up near the top of the list, this gem might be for you! If not, you probably don't need it. Either way, your milage may vary depending on the type of strings on which you're calling `underscore`.
-
-## Usage with Rails
-
-`ActiveSupport::Inflector#underscore`, in addition to underscoring the input will additionally take into account known acronyms. Since this can't be done at compile time, `FastUnderscore` will detect when `ActiveSupport` is loaded and take advantage of its knowledge of acronyms while still using the native extension.
-
-Since the `#underscore` method is used so much throughout the Rails boot process (for autoloading dependencies, determining table names, determining inverse associations, etc.), it's best to hook into Rails as early as possible. As such, for the best results in your `Gemfile` add `require: false` to the `gem 'fast_underscore'` declaration and add `require 'fast_underscore'` to the bottom of `config/boot.rb`.
-
 ## Is it fast?
 
 At last check, these were the benchmarks (obtained by running `bin/bench` with Rails 6.0.2):
@@ -47,6 +37,12 @@ And then execute:
 Or install it yourself as:
 
     $ gem install fast_underscore
+
+### Usage with Rails
+
+`ActiveSupport::Inflector#underscore`, in addition to underscoring the input will additionally take into account known acronyms. Since this can't be done at compile time, `FastUnderscore` will detect when `ActiveSupport` is loaded and take advantage of its knowledge of acronyms while still using the native extension.
+
+Since the `#underscore` method is used so much throughout the Rails boot process (for autoloading dependencies, determining table names, determining inverse associations, etc.), it's best to hook into Rails as early as possible. As such, for the best results in your `Gemfile` add `require: false` to the `gem 'fast_underscore'` declaration and add `require 'fast_underscore'` to the bottom of `config/boot.rb`.
 
 ## Development
 

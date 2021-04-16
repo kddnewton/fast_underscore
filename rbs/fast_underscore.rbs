@@ -1,3 +1,0 @@
-module FastUnderscore
-  def self.install: () -> void
-end

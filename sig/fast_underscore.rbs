@@ -1,0 +1,10 @@
+module FastUnderscore
+  VERSION: String
+
+  def self.active_support: () -> void
+  def self.underscore: (String string) -> String
+end
+
+class String
+  def underscore: () -> String
+end

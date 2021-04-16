@@ -1,34 +1,22 @@
 #include <ruby.h>
 #include <ruby/encoding.h>
-#include <stdlib.h>
 
-/**
- * true if the given codepoint is a lowercase ascii character.
- */
-static int
-character_is_lower(unsigned int character) {
+// true if the given codepoint is a lowercase ascii character.
+static int character_is_lower(unsigned int character) {
   return character >= 'a' && character <= 'z';
 }
 
-/**
- * true if the given codepoint is a uppercase ascii character.
- */
-static int
-character_is_upper(unsigned int character) {
+// true if the given codepoint is a uppercase ascii character.
+static int character_is_upper(unsigned int character) {
   return character >= 'A' && character <= 'Z';
 }
 
-/**
- * true if the given codepoint is an ascii digit.
- */
-static int
-character_is_digit(unsigned int character) {
+// true if the given codepoint is an ascii digit.
+static int character_is_digit(unsigned int character) {
   return character >= '0' && character <= '9';
 }
 
-/**
- * Macros for extracting the character out of the `codepoint_t` struct.
- */
+// Macros for extracting the character out of the `codepoint_t` struct.
 #define codepoint_is_lower(codepoint) character_is_lower(codepoint->character)
 #define codepoint_is_upper(codepoint) character_is_upper(codepoint->character)
 #define codepoint_is_digit(codepoint) character_is_digit(codepoint->character)
@@ -140,72 +128,9 @@ typedef struct builder {
   int push_next;
 } builder_t;
 
-/**
- * Allocate and initialize a `codepoint_t` struct.
- */
-static codepoint_t*
-codepoint_build(rb_encoding *encoding) {
-  codepoint_t *codepoint;
-
-  codepoint = (codepoint_t *) malloc(sizeof(codepoint_t));
-  if (codepoint == NULL) {
-    return NULL;
-  }
-
-  codepoint->encoding = encoding;
-  return codepoint;
-}
-
-/**
- * Free a previously allocated `codepoint_t` struct.
- */
-static void
-codepoint_free(codepoint_t *codepoint) {
-  free(codepoint);
-}
-
-/**
- * Allocate and initialize a `builder_t` struct.
- */
-static builder_t*
-builder_build(long str_len) {
-  builder_t *builder;
-
-  builder = (builder_t *) malloc(sizeof(builder_t));
-  if (builder == NULL) {
-    return NULL;
-  }
-
-  builder->state = STATE_DEFAULT;
-  builder->segment = (char *) malloc(str_len * sizeof(unsigned int) * 2);
-
-  if (builder->segment == NULL) {
-    free(builder);
-    return NULL;
-  }
-
-  builder->result = (char *) malloc(str_len * sizeof(unsigned int) * 2);
-
-  if (builder->result == NULL) {
-    free(builder->segment);
-    free(builder);
-    return NULL;
-  }
-
-  builder->segment_size = 0;
-  builder->result_size = 0;
-  builder->push_next = 0;
-
-  return builder;
-}
-
-/**
- * Push a character onto the resultant string using the given codepoint and
- * encoding.
- */
-static void
-builder_result_push_char(builder_t *builder, unsigned int character, int size,
-                         rb_encoding *encoding) {
+// Push a character onto the resultant string using the given codepoint and
+// encoding.
+static void builder_result_push_char(builder_t *builder, unsigned int character, int size, rb_encoding *encoding) {
   if (character_is_upper(character)) {
     if (builder->push_next == 1) {
       builder->push_next = 0;
@@ -226,20 +151,14 @@ builder_result_push_char(builder_t *builder, unsigned int character, int size,
   }
 }
 
-/**
- * Push the given codepoint onto the builder.
- */
-static void
-builder_segment_push(builder_t *builder, codepoint_t *codepoint) {
+// Push the given codepoint onto the builder.
+static void builder_segment_push(builder_t *builder, codepoint_t *codepoint) {
   builder->segment[builder->segment_size++] = (char) codepoint->character;
 }
 
-/**
- * Copy the given number of characters out of the segment cache onto the result
- * string.
- */
-static void
-builder_segment_copy(builder_t *builder, long size) {
+// Copy the given number of characters out of the segment cache onto the result
+// string.
+static void builder_segment_copy(builder_t *builder, long size) {
   long idx;
 
   for (idx = 0; idx < size; idx++) {
@@ -247,24 +166,18 @@ builder_segment_copy(builder_t *builder, long size) {
   }
 }
 
-/**
- * Restart the `builder_t` back at the default state (because we've hit a
- * character for which we have no allowed transitions).
- */
-static void
-builder_restart(builder_t *builder) {
+// Restart the `builder_t` back at the default state (because we've hit a
+// character for which we have no allowed transitions).
+static void builder_restart(builder_t *builder) {
   builder->state = STATE_DEFAULT;
   builder->segment_size = 0;
 }
 
 static void builder_next(builder_t *builder, codepoint_t *codepoint);
 
-/**
- * Pull the remaining content out of the cached segment in case we don't end
- * parsing while not in the default state.
- */
-static void
-builder_flush(builder_t *builder) {
+// Pull the remaining content out of the cached segment in case we don't end
+// parsing while not in the default state.
+static void builder_flush(builder_t *builder) {
   switch (builder->state) {
     case STATE_DEFAULT: return;
     case STATE_COLON:
@@ -277,33 +190,30 @@ builder_flush(builder_t *builder) {
   }
 }
 
-/**
- * Perform transitions from the STATE_DEFAULT state.
- */
-static inline void
-builder_default_transition(builder_t *builder, codepoint_t *codepoint) {
+// Perform transitions from the STATE_DEFAULT state.
+static inline void builder_default_transition(builder_t *builder, codepoint_t *codepoint) {
   if (codepoint->character == '-') {
     builder_result_push_literal(builder, '_');
     return;
   }
+
   if (codepoint->character == ':') {
     builder->state = STATE_COLON;
     return;
   }
+
   if (codepoint_is_digit(codepoint) || codepoint_is_upper(codepoint)) {
     builder->segment[0] = (char) codepoint->character;
     builder->segment_size = 1;
     builder->state = STATE_UPPER_START;
     return;
   }
+
   builder_result_push(builder, codepoint);
 }
 
-/**
- * Perform transitions from the STATE_COLON state.
- */
-static inline void
-builder_colon_transition(builder_t *builder, codepoint_t *codepoint) {
+// Perform transitions from the STATE_COLON state.
+static inline void builder_colon_transition(builder_t *builder, codepoint_t *codepoint) {
   if (codepoint->character == ':') {
     builder_result_push_literal(builder, '/');
     builder_restart(builder);
@@ -315,15 +225,13 @@ builder_colon_transition(builder_t *builder, codepoint_t *codepoint) {
   builder_next(builder, codepoint);
 }
 
-/**
- * Perform transitions from the STATE_UPPER_START state.
- */
-static inline void
-builder_upper_start_transition(builder_t *builder, codepoint_t *codepoint) {
+// Perform transitions from the STATE_UPPER_START state.
+static inline void builder_upper_start_transition(builder_t *builder, codepoint_t *codepoint) {
   if (codepoint_is_digit(codepoint)) {
     builder_segment_push(builder, codepoint);
     return;
   }
+
   if (codepoint_is_upper(codepoint)) {
     builder_segment_push(builder, codepoint);
     builder->state = STATE_UPPER_END;
@@ -335,20 +243,19 @@ builder_upper_start_transition(builder_t *builder, codepoint_t *codepoint) {
   builder_next(builder, codepoint);
 }
 
-/**
- * Perform transitions from the STATE_UPPER_END state.
- */
-static inline void
-builder_upper_end_transition(builder_t *builder, codepoint_t *codepoint) {
+// Perform transitions from the STATE_UPPER_END state.
+static inline void builder_upper_end_transition(builder_t *builder, codepoint_t *codepoint) {
   if (codepoint_is_digit(codepoint)) {
     builder_segment_push(builder, codepoint);
     builder->state = STATE_UPPER_START;
     return;
   }
+
   if (codepoint_is_upper(codepoint)) {
     builder_segment_push(builder, codepoint);
     return;
   }
+
   if (codepoint_is_lower(codepoint)) {
     builder_segment_copy(builder, builder->segment_size - 1);
     builder_result_push_literal(builder, '_');
@@ -363,12 +270,8 @@ builder_upper_end_transition(builder_t *builder, codepoint_t *codepoint) {
   builder_next(builder, codepoint);
 }
 
-/**
- * Accept the next codepoint, which will move the `builder_t` struct into the
- * next state.
- */
-static void
-builder_next(builder_t *builder, codepoint_t *codepoint) {
+// Accept the next codepoint, which will move the `builder_t` struct into the next state.
+static void builder_next(builder_t *builder, codepoint_t *codepoint) {
   switch (builder->state) {
     case STATE_DEFAULT:
       return builder_default_transition(builder, codepoint);
@@ -379,16 +282,6 @@ builder_next(builder_t *builder, codepoint_t *codepoint) {
     case STATE_UPPER_END:
       return builder_upper_end_transition(builder, codepoint);
   }
-}
-
-/**
- * Frees a previously allocated `builder_t` struct.
- */
-static void
-builder_free(builder_t *builder) {
-  free(builder->segment);
-  free(builder->result);
-  free(builder);
 }
 
 /**
@@ -404,53 +297,46 @@ builder_free(builder_t *builder) {
  *
  *     camelize(underscore('SSLError'))  # => "SslError"
  */
-static VALUE
-str_underscore(VALUE rb_string) {
-  VALUE resultant;
-  rb_encoding *encoding;
+static VALUE underscore(VALUE string) {
+  char segment[RSTRING_LEN(string) * 2 * sizeof(unsigned int) * 2];
+  char result[RSTRING_LEN(string) * 2 * sizeof(unsigned int) * 2];
 
-  char *string;
-  char *end;
+  builder_t builder = {
+    .state = STATE_DEFAULT,
+    .segment = segment,
+    .result = result,
+    .segment_size = 0,
+    .result_size = 0,
+    .push_next = 0
+  };
 
-  builder_t *builder;
-  codepoint_t *codepoint;
+  codepoint_t codepoint = {
+    .encoding = rb_enc_from_index(ENCODING_GET(string)),
+    .character = 0,
+    .size = 0
+  };
 
-  encoding = rb_enc_from_index(ENCODING_GET(rb_string));
-  string = RSTRING_PTR(rb_string);
-  end = RSTRING_END(rb_string);
+  char *pointer = RSTRING_PTR(string);
+  char *end = RSTRING_END(string);
 
-  builder = builder_build(RSTRING_LEN(rb_string) * 2);
-  codepoint = codepoint_build(encoding);
-
-  while (string < end) {
-    codepoint->character = rb_enc_codepoint_len(string, end, &codepoint->size, encoding);
-    builder_next(builder, codepoint);
-    string += codepoint->size;
+  while (pointer < end) {
+    codepoint.character = rb_enc_codepoint_len(pointer, end, &codepoint.size, codepoint.encoding);
+    builder_next(&builder, &codepoint);
+    pointer += codepoint.size;
   }
-  builder_flush(builder);
 
-  resultant = rb_enc_str_new(builder->result, builder->result_size, encoding);
-  builder_free(builder);
-  codepoint_free(codepoint);
-
-  return resultant;
+  builder_flush(&builder);
+  return rb_enc_str_new(builder.result, builder.result_size, codepoint.encoding);
 }
 
-/**
- * A singleton method calls with a string that delegates to `str_underscore` to
- * form an underscored, lowercase form from the expression in the string.
- */
-static VALUE
-rb_str_underscore(VALUE self, VALUE rb_string) {
-  return str_underscore(rb_string);
+// FastUnderscore::underscore
+static VALUE fast_underscore(VALUE self, VALUE string) {
+  return underscore(string);
 }
 
-/**
- * Hook into Ruby and define the `FastUnderscore::underscore`.
- */
-void
-Init_fast_underscore(void) {
+// Hook into Ruby and define FastUnderscore::underscore and String#underscore
+void Init_fast_underscore(void) {
   VALUE rb_cFastUnderscore = rb_define_module("FastUnderscore");
-  rb_define_singleton_method(rb_cFastUnderscore, "underscore", rb_str_underscore, 1);
-  rb_define_method(rb_cString, "underscore", str_underscore, 0);
+  rb_define_singleton_method(rb_cFastUnderscore, "underscore", fast_underscore, 1);
+  rb_define_method(rb_cString, "underscore", underscore, 0);
 }

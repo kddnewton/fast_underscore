@@ -15,9 +15,11 @@ module FastUnderscore
       FastUnderscore.underscore(response)
     end
   end
+end
 
-  class << ActiveSupport::Inflector
+module ActiveSupport
+  module Inflector
     alias as_underscore underscore
-    include AcronymUnderscoreRegex
+    include FastUnderscore::AcronymUnderscoreRegex
   end
 end
