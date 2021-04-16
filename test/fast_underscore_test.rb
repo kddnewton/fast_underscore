@@ -3,11 +3,6 @@
 require 'test_helper'
 
 class FastUnderscoreTest < Minitest::Test
-  def test_install
-    path, = ''.method(:underscore).source_location
-    assert_nil path
-  end
-
   def test_basic
     assert_equal 'foo/bar_baz', 'foo::bar-baz'.underscore
     assert_equal 'foo_bar_baz', 'FooBarBaz'.underscore
