@@ -7,8 +7,8 @@ require 'fast_underscore/version'
 Gem::Specification.new do |spec|
   spec.name          = 'fast_underscore'
   spec.version       = FastUnderscore::VERSION
-  spec.authors       = ['Kevin Deisz']
-  spec.email         = ['kevin.deisz@gmail.com']
+  spec.authors       = ['Kevin Newton']
+  spec.email         = ['kddnewton@gmail.com']
 
   spec.summary       = 'Fast String#underscore implementation'
   spec.description   = 'Provides a C-optimized method for underscoring a string'
