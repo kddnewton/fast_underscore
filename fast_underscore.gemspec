@@ -12,7 +12,7 @@ Gem::Specification.new do |spec|
 
   spec.summary       = 'Fast String#underscore implementation'
   spec.description   = 'Provides a C-optimized method for underscoring a string'
-  spec.homepage      = 'https://github.com/kddeisz/fast_underscore'
+  spec.homepage      = 'https://github.com/kddnewton/fast_underscore'
   spec.license       = 'MIT'
 
   spec.files         = `git ls-files -z`.split("\x0").reject do |f|

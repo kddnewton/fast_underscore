@@ -1,6 +1,6 @@
 # `String#underscore` Ruby Extension
 
-[![Build Status](https://github.com/kddeisz/fast_underscore/workflows/Main/badge.svg)](https://github.com/kddeisz/fast_underscore/actions)
+[![Build Status](https://github.com/kddnewton/fast_underscore/workflows/Main/badge.svg)](https://github.com/kddnewton/fast_underscore/actions)
 [![Gem Version](https://img.shields.io/gem/v/fast_underscore.svg)](https://rubygems.org/gems/fast_underscore)
 
 `fast_underscore` is a C extension that provides a fast implementation of [ActiveSupport's `String#underscore` method](http://api.rubyonrails.org/classes/String.html#method-i-underscore).
@@ -52,7 +52,7 @@ To install this gem onto your local machine, run `bundle exec rake install`. To 
 
 ## Contributing
 
-Bug reports and pull requests are welcome on GitHub at https://github.com/kddeisz/fast_underscore.
+Bug reports and pull requests are welcome on GitHub at https://github.com/kddnewton/fast_underscore.
 
 ## License
 
