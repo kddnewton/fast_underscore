@@ -1,23 +1,32 @@
 # frozen_string_literal: true
 
-lib = File.expand_path('lib', __dir__)
-$LOAD_PATH.unshift(lib) unless $LOAD_PATH.include?(lib)
-require 'fast_underscore/version'
+require_relative 'lib/fast_underscore/version'
+
+version = FastUnderscore::VERSION
+repository = 'https://github.com/kddnewton/fast_underscore'
 
 Gem::Specification.new do |spec|
   spec.name          = 'fast_underscore'
-  spec.version       = FastUnderscore::VERSION
+  spec.version       = version
   spec.authors       = ['Kevin Newton']
   spec.email         = ['kddnewton@gmail.com']
 
   spec.summary       = 'Fast String#underscore implementation'
   spec.description   = 'Provides a C-optimized method for underscoring a string'
-  spec.homepage      = 'https://github.com/kddnewton/fast_underscore'
+  spec.homepage      = repository
   spec.license       = 'MIT'
 
-  spec.files         = `git ls-files -z`.split("\x0").reject do |f|
+  spec.metadata      = {
+    'bug_tracker_uri' => "#{repository}/issues",
+    'changelog_uri' => "#{repository}/blob/v#{version}/CHANGELOG.md",
+    'source_code_uri' => repository,
+    'rubygems_mfa_required' => 'true'
+  }
+
+  spec.files = `git ls-files -z`.split("\x0").reject do |f|
     f.match(%r{^(test|spec|features)/})
   end
+
   spec.bindir        = 'exe'
   spec.executables   = spec.files.grep(%r{^exe/}) { |f| File.basename(f) }
   spec.require_paths = ['lib']
