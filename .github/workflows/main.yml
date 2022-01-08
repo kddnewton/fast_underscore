@@ -10,10 +10,9 @@ jobs:
       fail-fast: false
       matrix:
         gemfile:
-        - "5.1"
-        - "5.2"
-        - "6.0"
-        - "6.1"
+        - '6.0'
+        - '6.1'
+        - '7.0'
     env:
       CI: true
       BUNDLE_GEMFILE: gemfiles/${{ matrix.gemfile }}.gemfile
@@ -21,13 +20,12 @@ jobs:
     - uses: actions/checkout@master
     - uses: ruby/setup-ruby@v1
       with:
-        ruby-version: 3.0
+        ruby-version: '3.0'
         bundler-cache: true
     - name: Lint and test
       run: |
         bundle exec rubocop --parallel
         bundle exec rake test
-        bundle exec steep check
   automerge:
     name: AutoMerge
     needs: ci
