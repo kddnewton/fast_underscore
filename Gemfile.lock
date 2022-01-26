@@ -12,7 +12,7 @@ GEM
       minitest (>= 5.1)
       tzinfo (~> 2.0)
     ast (2.4.2)
-    benchmark-ips (2.9.2)
+    benchmark-ips (2.9.3)
     concurrent-ruby (1.1.9)
     i18n (1.8.11)
       concurrent-ruby (~> 1.0)
