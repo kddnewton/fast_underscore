@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
-require 'fast_underscore/version'
-require 'fast_underscore/fast_underscore'
+require "fast_underscore/version"
+require "fast_underscore/fast_underscore"
 
 module FastUnderscore
   # Override ActiveSupport::Inflector::underscore to use
@@ -51,7 +51,7 @@ module FastUnderscore
   end
 
   # Override the String#underscore method no matter when it was defined so that
-  # we're sure it's going to call the correct implementation.
+  # we"re sure it"s going to call the correct implementation.
   module ActiveSupportStringPatch
     def underscore
       ActiveSupport::Inflector.underscore(self)
@@ -63,10 +63,10 @@ module FastUnderscore
   # ActiveSupport::Inflector::underscore method to use the FastUnderscore
   # native extension.
   def self.active_support
-    require 'active_support/version'
+    require "active_support/version"
     gem_version = Gem::Version.new(ActiveSupport::VERSION::STRING)
 
-    if gem_version >= Gem::Version.new('5.2.0')
+    if gem_version >= Gem::Version.new("5.2.0")
       ActiveSupport::Inflector.prepend(ActiveSupportInflectorPatch)
     else
       ActiveSupport::Inflector.prepend(ActiveSupportInflectorOldPatch)

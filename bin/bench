@@ -1,22 +1,22 @@
 #!/usr/bin/env ruby
 # frozen_string_literal: true
 
-require 'bundler/setup'
-require 'benchmark/ips'
+require "bundler/setup"
+require "benchmark/ips"
 
-require 'fast_underscore'
-require 'active_support'
+require "fast_underscore"
+require "active_support"
 
 source =
-  %w[_ - : :: / 漢字 😊🎉] + ('a'..'z').to_a + ('A'..'Z').to_a + ('0'..'9').to_a
+  %w[_ - : :: / 漢字 😊🎉] + ("a".."z").to_a + ("A".."Z").to_a + ("0".."9").to_a
 words = 500.times.map { Array.new(100) { source.sample }.join }
 
 Benchmark.ips do |x|
-  x.report('ActiveSupport') do
+  x.report("ActiveSupport") do
     words.each { |word| ActiveSupport::Inflector.as_underscore(word) }
   end
 
-  x.report('FastUnderscore') do
+  x.report("FastUnderscore") do
     words.each { |word| FastUnderscore.underscore(word) }
   end
 

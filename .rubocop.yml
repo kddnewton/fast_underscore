@@ -1,6 +1,8 @@
 AllCops:
   DisplayCopNames: true
   DisplayStyleGuide: true
+  NewCops: enable
+  SuggestExtensions: false
   TargetRubyVersion: 2.7
   Exclude:
   - '{tmp,vendor,yard}/**/*'
@@ -28,3 +30,6 @@ Style/FormatStringToken:
 
 Style/PerlBackrefs:
   Enabled: false
+
+Style/StringLiterals:
+  EnforcedStyle: double_quotes

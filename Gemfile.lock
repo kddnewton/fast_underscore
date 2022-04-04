@@ -16,10 +16,15 @@ GEM
     concurrent-ruby (1.1.9)
     i18n (1.10.0)
       concurrent-ruby (~> 1.0)
+    mini_portile2 (2.8.0)
     minitest (5.15.0)
+    nokogiri (1.13.3)
+      mini_portile2 (~> 2.8.0)
+      racc (~> 1.4)
     parallel (1.22.0)
     parser (3.1.1.0)
       ast (~> 2.4.1)
+    racc (1.6.0)
     rainbow (3.1.1)
     rake (13.0.6)
     rake-compiler (1.1.9)
@@ -38,6 +43,8 @@ GEM
     rubocop-ast (1.16.0)
       parser (>= 3.1.1.0)
     ruby-progressbar (1.11.0)
+    ruby_memcheck (1.0.2)
+      nokogiri
     tzinfo (2.0.4)
       concurrent-ruby (~> 1.0)
     unicode-display_width (2.1.0)
@@ -54,6 +61,7 @@ DEPENDENCIES
   rake (~> 13)
   rake-compiler (~> 1)
   rubocop (~> 1.12)
+  ruby_memcheck
 
 BUNDLED WITH
    2.2.3
