@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
-source 'https://rubygems.org'
+source "https://rubygems.org"
 
 gemspec
 
-gem 'activesupport', '~> 7.0'
+gem "activesupport", "~> 7.0"
