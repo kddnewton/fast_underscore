@@ -5,7 +5,16 @@ require "rake/testtask"
 require "rake/extensiontask"
 require "ruby_memcheck"
 
-RubyMemcheck.config(binary_name: "fast_underscore")
+RubyMemcheck.config(
+  binary_name: "fast_underscore",
+  skipped_ruby_functions: [
+    *RubyMemcheck::Configuration::DEFAULT_SKIPPED_RUBY_FUNCTIONS,
+    # Explicitly ignoring this function as it allocates a string to the heap but
+    # Ruby doesn't free it. This is the final function that we call to return
+    # the underscored string back to the user.
+    /\Arb_enc_str_new\z/
+  ]
+)
 
 Rake::ExtensionTask.new(:compile) do |ext|
   ext.name = "fast_underscore"
