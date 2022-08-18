@@ -18,7 +18,7 @@ GEM
       concurrent-ruby (~> 1.0)
     json (2.6.2)
     mini_portile2 (2.8.0)
-    minitest (5.16.2)
+    minitest (5.16.3)
     nokogiri (1.13.8)
       mini_portile2 (~> 2.8.0)
       racc (~> 1.4)
