@@ -10,8 +10,8 @@ class FastUnderscoreTest < Minitest::Test
   end
 
   def test_fuzzing
-    source = %w[_ - : :: / 漢字 😊🎉] +
-             ("a".."z").to_a + ("A".."Z").to_a + ("0".."9").to_a
+    source =
+      %w[_ - : :: / 漢字 😊🎉] + ("a".."z").to_a + ("A".."Z").to_a + ("0".."9").to_a
 
     500.times do
       word = Array.new(100) { source.sample }.join

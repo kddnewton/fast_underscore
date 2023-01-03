@@ -27,7 +27,7 @@ Comparison:
 Add this line to your application's Gemfile:
 
 ```ruby
-gem 'fast_underscore'
+gem "fast_underscore"
 ```
 
 And then execute:

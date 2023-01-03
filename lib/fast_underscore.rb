@@ -19,7 +19,7 @@ module FastUnderscore
 
       response = string.dup
       response.gsub!(ActiveSupportInflectorOldPatch.pattern) do
-        "#{$1 && '_'}#{$2.downcase}"
+        "#{$1 && "_"}#{$2.downcase}"
       end
 
       FastUnderscore.underscore(response)
@@ -35,7 +35,7 @@ module FastUnderscore
       response = string.dup
       acronyms = ActiveSupport::Inflector.inflections.acronyms_underscore_regex
 
-      response.gsub!(acronyms) { "#{$1 && '_'}#{$2.downcase}" }
+      response.gsub!(acronyms) { "#{$1 && "_"}#{$2.downcase}" }
 
       FastUnderscore.underscore(response)
     end
