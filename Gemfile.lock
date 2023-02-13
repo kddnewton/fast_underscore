@@ -48,7 +48,7 @@ GEM
     ruby-progressbar (1.11.0)
     ruby_memcheck (1.2.0)
       nokogiri
-    syntax_tree (5.3.0)
+    syntax_tree (6.0.0)
       prettier_print (>= 1.2.0)
     tzinfo (2.0.5)
       concurrent-ruby (~> 1.0)
