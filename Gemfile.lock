@@ -39,7 +39,7 @@ GEM
       ast (~> 2.4.1)
       racc
     prettier_print (1.2.1)
-    racc (1.7.1)
+    racc (1.7.3)
     rainbow (3.1.1)
     rake (13.1.0)
     rake-compiler (1.2.5)
@@ -61,7 +61,7 @@ GEM
       parser (>= 3.2.1.0)
     ruby-progressbar (1.13.0)
     ruby2_keywords (0.0.5)
-    ruby_memcheck (2.2.0)
+    ruby_memcheck (2.2.1)
       nokogiri
     syntax_tree (6.2.0)
       prettier_print (>= 1.2.0)
