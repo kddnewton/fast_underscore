@@ -23,17 +23,17 @@ Gem::Specification.new do |spec|
     "rubygems_mfa_required" => "true"
   }
 
-  spec.files = [
-    "CHANGELOG.md",
-    "CODE_OF_CONDUCT.md",
-    "LICENSE",
-    "README.md",
-    "ext/fast_underscore/extconf.rb",
-    "ext/fast_underscore/fast_underscore.c",
-    "ext/fast_underscore/fast_underscore.h",
-    "fast_underscore.gemspec",
-    "lib/fast_underscore.rb",
-    "lib/fast_underscore/version.rb"
+  spec.files = %w[
+    CHANGELOG.md
+    CODE_OF_CONDUCT.md
+    LICENSE
+    README.md
+    ext/fast_underscore/extconf.rb
+    ext/fast_underscore/fast_underscore.c
+    ext/fast_underscore/fast_underscore.h
+    fast_underscore.gemspec
+    lib/fast_underscore.rb
+    lib/fast_underscore/version.rb
   ]
 
   spec.require_paths = ["lib"]
