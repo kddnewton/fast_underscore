@@ -30,7 +30,6 @@ Gem::Specification.new do |spec|
     README.md
     ext/fast_underscore/extconf.rb
     ext/fast_underscore/fast_underscore.c
-    ext/fast_underscore/fast_underscore.h
     fast_underscore.gemspec
     lib/fast_underscore.rb
     lib/fast_underscore/version.rb

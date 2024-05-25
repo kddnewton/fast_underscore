@@ -1,3 +1,0 @@
-#ifndef FAST_UNDERSCORE_H
-#define FAST_UNDERSCORE_H
-#endif
