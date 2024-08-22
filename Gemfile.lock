@@ -47,7 +47,7 @@ GEM
     rake-compiler (1.2.7)
       rake
     regexp_parser (2.9.2)
-    rexml (3.3.4)
+    rexml (3.3.6)
       strscan
     rubocop (1.65.1)
       json (~> 2.3)
