@@ -50,7 +50,7 @@ GEM
     rake-compiler (1.2.8)
       rake
     regexp_parser (2.9.3)
-    rubocop (1.69.1)
+    rubocop (1.69.2)
       json (~> 2.3)
       language_server-protocol (>= 3.17.0)
       parallel (~> 1.10)
