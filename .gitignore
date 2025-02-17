@@ -7,5 +7,5 @@
 /spec/reports/
 /tmp/
 
-/gemfiles/*.lock
+/gemfiles/**/*.lock
 /lib/fast_underscore/fast_underscore.bundle

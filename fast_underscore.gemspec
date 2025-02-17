@@ -38,12 +38,13 @@ Gem::Specification.new do |spec|
   spec.require_paths = ["lib"]
   spec.extensions = ["ext/fast_underscore/extconf.rb"]
 
-  spec.add_development_dependency "benchmark-ips", "~> 2"
-  spec.add_development_dependency "bundler", "~> 2"
-  spec.add_development_dependency "minitest", "~> 5"
-  spec.add_development_dependency "rake", "~> 13"
-  spec.add_development_dependency "rake-compiler", "~> 1"
-  spec.add_development_dependency "rubocop", "~> 1.12"
+  spec.add_development_dependency "benchmark-ips"
+  spec.add_development_dependency "bundler"
+  spec.add_development_dependency "logger"
+  spec.add_development_dependency "minitest"
+  spec.add_development_dependency "rake"
+  spec.add_development_dependency "rake-compiler"
+  spec.add_development_dependency "rubocop"
   spec.add_development_dependency "ruby_memcheck"
   spec.add_development_dependency "syntax_tree"
 end
