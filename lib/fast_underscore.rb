@@ -5,29 +5,7 @@ require "fast_underscore/fast_underscore"
 
 module FastUnderscore
   # Override ActiveSupport::Inflector::underscore to use
-  # FastUnderscore::underscore for ActiveSupport < 5.2.0.
-  module ActiveSupportInflectorOldPatch
-    def self.pattern
-      return @pattern if defined?(@pattern)
-
-      acronym_regex = ActiveSupport::Inflector.inflections.acronym_regex
-      @pattern = /(?:(?<=([A-Za-z\d]))|\b)(#{acronym_regex})(?=\b|[^a-z])/
-    end
-
-    def underscore(string)
-      return string unless /[A-Z-]|::/.match?(string)
-
-      response = string.dup
-      response.gsub!(ActiveSupportInflectorOldPatch.pattern) do
-        "#{$1 && "_"}#{$2.downcase}"
-      end
-
-      FastUnderscore.underscore(response)
-    end
-  end
-
-  # Override ActiveSupport::Inflector::underscore to use
-  # FastUnderscore::underscore for ActiveSupport >= 5.2.0.
+  # FastUnderscore::underscore.
   module ActiveSupportInflectorPatch
     def underscore(string)
       return string unless /[A-Z-]|::/.match?(string)
@@ -51,7 +29,7 @@ module FastUnderscore
   end
 
   # Override the String#underscore method no matter when it was defined so that
-  # we"re sure it"s going to call the correct implementation.
+  # we're sure it is going to call the correct implementation.
   module ActiveSupportStringPatch
     def underscore
       ActiveSupport::Inflector.underscore(self)
@@ -63,15 +41,7 @@ module FastUnderscore
   # ActiveSupport::Inflector::underscore method to use the FastUnderscore
   # native extension.
   def self.active_support
-    require "active_support/version"
-    gem_version = Gem::Version.new(ActiveSupport::VERSION::STRING)
-
-    if gem_version >= Gem::Version.new("5.2.0")
-      ActiveSupport::Inflector.prepend(ActiveSupportInflectorPatch)
-    else
-      ActiveSupport::Inflector.prepend(ActiveSupportInflectorOldPatch)
-    end
-
+    ActiveSupport::Inflector.prepend(ActiveSupportInflectorPatch)
     ActiveSupport::Inflector.alias_method(:as_underscore, :underscore)
     String.prepend(ActiveSupportStringPatch)
   end
