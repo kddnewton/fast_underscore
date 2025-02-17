@@ -7,10 +7,13 @@ on:
 jobs:
   ci:
     name: CI
-    runs-on: ubuntu-latest
     strategy:
       fail-fast: false
       matrix:
+        os:
+          - ubuntu-latest
+          - macos-latest
+          - windows-latest
         gemfile:
           - '7.0'
           - '7.1'
@@ -21,6 +24,7 @@ jobs:
           - '3.3'
           - '3.4'
           - 'head'
+    runs-on: ${{ matrix.os }}
     env:
       BUNDLE_GEMFILE: gemfiles/${{ matrix.gemfile }}/Gemfile
     steps:
