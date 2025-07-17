@@ -70,7 +70,7 @@ GEM
     ruby_memcheck (3.0.1)
       nokogiri
     securerandom (0.4.1)
-    syntax_tree (6.2.0)
+    syntax_tree (6.3.0)
       prettier_print (>= 1.2.0)
     tzinfo (2.0.6)
       concurrent-ruby (~> 1.0)
